@@ -30,10 +30,16 @@ class TelemetryService {
   core::ObdTransport& transport_;
   core::PidDecoder& pid_decoder_;
   app_link::TransportBle& app_link_;
-  uint32_t telemetry_field_mask_ = core::kTelemetryFieldAll;
+  uint32_t telemetry_field_mask_ = core::kTelemetryFieldDefault;
   size_t rotation_index_ = 0;
   String accumulated_json_;
   bool any_field_obtained_ = false;
+  uint32_t last_degraded_ms_ = 0;
+
+  // Telemetry JSON body length before "ts" at which a message is split; keeps
+  // each notify under the 244-byte payload of a 247-byte ATT MTU.
+  static constexpr size_t kMaxPayloadBody = 190;
+  static constexpr uint32_t kDegradedIntervalMs = 1000;
 };
 
 }  // namespace services

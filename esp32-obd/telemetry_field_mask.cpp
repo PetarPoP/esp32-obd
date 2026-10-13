@@ -1,19 +1,22 @@
 #include "telemetry_field_mask.h"
 
+#include "pid_decoder.h"
+
 namespace obd {
 namespace core {
 
 namespace {
 
 void ApplyMetricToken(const String& token, uint32_t& mask) {
-  if (token == "rpm") {
-    mask |= kTelemetryFieldRpm;
-  } else if (token == "coolant_c") {
-    mask |= kTelemetryFieldCoolantC;
-  } else if (token == "throttle_pct") {
-    mask |= kTelemetryFieldThrottlePct;
-  } else if (token == "speed_kmh") {
-    mask |= kTelemetryFieldSpeedKmh;
+  if (token == "all") {
+    mask |= kTelemetryFieldAll;
+    return;
+  }
+  for (size_t i = 0; i < kPidCatalogueLen; ++i) {
+    if (token == kPidCatalogue[i].json_key) {
+      mask |= kPidCatalogue[i].mask_bit;
+      return;
+    }
   }
 }
 
@@ -30,17 +33,17 @@ String StripJsonQuotes(String token) {
 uint32_t ParseTelemetryFieldMask(const String& raw_json) {
   const int key_pos = raw_json.indexOf("\"metrics\"");
   if (key_pos < 0) {
-    return kTelemetryFieldAll;
+    return kTelemetryFieldDefault;
   }
 
   const int open_bracket = raw_json.indexOf('[', key_pos);
   if (open_bracket < 0) {
-    return kTelemetryFieldAll;
+    return kTelemetryFieldDefault;
   }
 
   const int close_bracket = raw_json.indexOf(']', open_bracket);
   if (close_bracket < 0 || close_bracket <= open_bracket) {
-    return kTelemetryFieldAll;
+    return kTelemetryFieldDefault;
   }
 
   uint32_t mask = 0;
@@ -58,7 +61,7 @@ uint32_t ParseTelemetryFieldMask(const String& raw_json) {
   }
 
   if (mask == 0) {
-    return kTelemetryFieldAll;
+    return kTelemetryFieldDefault;
   }
   return mask;
 }

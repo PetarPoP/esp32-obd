@@ -62,6 +62,8 @@ class CommandCallbacks : public BLECharacteristicCallbacks {
       command = "bus_diag";
     } else if (payload.indexOf("bus_scan") >= 0) {
       command = "bus_scan";
+    } else if (payload.indexOf("detect_protocol") >= 0) {
+      command = "detect_protocol";
     } else {
       status = "error";
       reason = "unsupported_command";

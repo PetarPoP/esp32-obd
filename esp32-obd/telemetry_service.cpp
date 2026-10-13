@@ -11,7 +11,7 @@ TelemetryService::TelemetryService(core::ObdTransport& transport,
 void TelemetryService::Tick() {
   while (rotation_index_ < core::kPidCatalogueLen) {
     const core::PidDescriptor& entry = core::kPidCatalogue[rotation_index_];
-    if ((telemetry_field_mask_ & entry.mask_bit) == 0) {
+    if ((telemetry_field_mask_ & entry.mask_bit) == 0 || !transport_.IsPidSupported(entry.pid)) {
       ++rotation_index_;
       continue;
     }
@@ -21,6 +21,14 @@ void TelemetryService::Tick() {
     if (transport_.RequestPid(entry.pid, payload, payload_len)) {
       const String value = pid_decoder_.FormatValue(entry.pid, payload, payload_len);
       if (value.length() > 0) {
+        if (any_field_obtained_ &&
+            accumulated_json_.length() + strlen(entry.json_key) + value.length() > kMaxPayloadBody) {
+          // Keep every notify inside the BLE MTU: send what we have and continue
+          // the rotation in a new telemetry message.
+          app_link_.NotifyTelemetry(accumulated_json_ + ",\"partial\":true,\"ts\":" +
+                                    String(millis()) + "}");
+          any_field_obtained_ = false;
+        }
         if (!any_field_obtained_) {
           accumulated_json_ = "{\"type\":\"telemetry\",\"status\":\"ok\"";
           any_field_obtained_ = true;
@@ -41,6 +49,12 @@ void TelemetryService::Tick() {
   if (any_field_obtained_) {
     payload = accumulated_json_;
   } else {
+    // Nothing answered (or nothing requested is supported): do not spin out
+    // degraded messages on every loop pass.
+    if (millis() - last_degraded_ms_ < kDegradedIntervalMs) {
+      return;
+    }
+    last_degraded_ms_ = millis();
     payload = "{\"type\":\"telemetry\",\"status\":\"degraded\"";
   }
   payload += ",\"ts\":";

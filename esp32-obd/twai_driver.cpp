@@ -104,21 +104,56 @@ bool TwaiDriver::ReadFrame(CanFrame& out_frame, uint32_t timeout_ms) {
     out_frame.data[i] = msg.data[i];
   }
   out_frame.timestamp_ms = millis();
+  out_frame.extended = (msg.flags & TWAI_MSG_FLAG_EXTD) != 0;
   return true;
 }
 
-bool TwaiDriver::SendFrame(uint32_t id, const uint8_t* data, uint8_t dlc, uint32_t timeout_ms) {
+bool TwaiDriver::SendFrame(uint32_t id, const uint8_t* data, uint8_t dlc, uint32_t timeout_ms,
+                           bool extended, bool single_shot) {
   if (!installed_ || listen_only_ || data == nullptr || dlc > 8) {
     return false;
   }
   twai_message_t msg = {};
   msg.identifier = id;
   msg.data_length_code = dlc;
-  msg.flags = 0;  // standard 11-bit, data frame, no extended
+  msg.flags = (extended ? TWAI_MSG_FLAG_EXTD : 0) | (single_shot ? TWAI_MSG_FLAG_SS : 0);
   for (uint8_t i = 0; i < dlc; ++i) {
     msg.data[i] = data[i];
   }
   return twai_transmit(&msg, pdMS_TO_TICKS(timeout_ms)) == ESP_OK;
+}
+
+bool TwaiDriver::RecoverIfBusOff() {
+  if (!installed_) {
+    return false;
+  }
+  twai_status_info_t info;
+  if (twai_get_status_info(&info) != ESP_OK) {
+    return false;
+  }
+  switch (info.state) {
+    case TWAI_STATE_RUNNING:
+      return true;
+    case TWAI_STATE_BUS_OFF:
+      twai_initiate_recovery();
+      return false;
+    case TWAI_STATE_STOPPED:
+      // Recovery finished (or the driver was stopped); restart it.
+      return twai_start() == ESP_OK;
+    default:
+      return false;  // still recovering
+  }
+}
+
+uint32_t TwaiDriver::BusErrorCount() {
+  if (!installed_) {
+    return 0;
+  }
+  twai_status_info_t info;
+  if (twai_get_status_info(&info) != ESP_OK) {
+    return 0;
+  }
+  return info.bus_error_count;
 }
 
 bool TwaiDriver::IsInstalled() const { return installed_; }
