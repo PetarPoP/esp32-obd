@@ -266,6 +266,35 @@ export function DashboardScreen() {
             </Text>
           </>
         ) : null}
+        <View style={styles.box}>
+          <Text style={styles.boxTitle}>Firmware update</Text>
+          <Text style={styles.text}>
+            {m.firmware.message ||
+              `Installed: ${m.device?.fw ?? "unknown"}. Updates are downloaded from GitHub and sent to the ESP over Bluetooth.`}
+          </Text>
+          {m.firmware.phase === "downloading" || m.firmware.phase === "uploading" || m.firmware.phase === "installing" ? (
+            <View style={styles.progressTrack}>
+              <View style={[styles.progressFill, { width: `${Math.round(m.firmware.progress * 100)}%` }]} />
+            </View>
+          ) : null}
+          <View style={styles.actionsRow}>
+            <View style={styles.flex}>
+              <ActionButton
+                label="Check for update"
+                onPress={() => {
+                  const busy = ["downloading", "uploading", "installing"].includes(m.firmware.phase);
+                  if (!busy) void m.checkFirmware();
+                }}
+              />
+            </View>
+            {m.firmware.phase === "available" ? (
+              <View style={styles.flex}>
+                <ActionButton label={`Install ${m.firmware.latest?.version ?? ""}`} onPress={() => void m.installFirmware()} />
+              </View>
+            ) : null}
+          </View>
+          <Text style={styles.text}>Keep the phone close to the ESP and the app open until the ESP restarts.</Text>
+        </View>
         <View style={styles.actionsRow}>
           {SLEEP_OPTIONS.map((o) => (
             <Pressable key={o.label} onPress={() => m.setSleepAfter(o.seconds)} style={styles.smallButton}>
@@ -345,6 +374,8 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   boxTitle: { color: theme.colors.textPrimary, fontWeight: "700", fontSize: 14 },
+  progressTrack: { height: 8, borderRadius: 4, backgroundColor: theme.colors.border, overflow: "hidden" },
+  progressFill: { height: 8, backgroundColor: theme.colors.accent },
   smallButton: {
     backgroundColor: theme.colors.background,
     borderColor: theme.colors.border,

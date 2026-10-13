@@ -11,6 +11,7 @@ porta i šalje ih mobilnoj aplikaciji preko Bluetooth Low Energy (BLE).
 | [`mobile/`](mobile/) | mobilna aplikacija (Expo / React Native), vidi [mobile/README.md](mobile/README.md) |
 | [`profiles/`](profiles/) | proizvođački PID-ovi za 60 marki / 608 modela (OBDb, CC BY-SA 4.0) |
 | [`tools/`](tools/) | generiranje profila i kataloga metrika, provjere |
+| [`firmware/`](firmware/) | gotova slika firmwarea i `version.json` za OTA iz aplikacije |
 | [`docs/`](docs/) | protokol, plan seminara, generator PDF-a seminara |
 
 ## Hardver i podržana vozila
@@ -168,6 +169,15 @@ Signali s istim upitom dijele jedan zahtjev, a vrijednosti stižu u istim
 i da se dekoder poklapa s OBDb referencom.
 
 ## OTA nadogradnja preko BLE-a
+
+Najjednostavnije iz aplikacije: Device → Firmware update → Check for update →
+Install. Aplikacija preuzima `firmware/esp32-obd.bin` i `firmware/version.json`
+s GitHuba (grana `master`) i šalje sliku na ESP. Nova verzija se objavljuje
+ovako: podigni `kFirmwareVersion` u `esp32-obd.ino`, pokreni
+`python tools/publish_firmware.py` i commitaj `firmware/`. Prvo flashanje
+firmwarea s OTA podrškom mora biti USB-om.
+
+Isto ručno:
 
 1. `{"cmd":"ota_begin","size":704512,"md5":"<md5 .bin datoteke>"}` → `ota` `ready`
 2. aplikacija piše `.bin` u dijelovima (do MTU−3 bajta) na karakteristiku OTA podataka

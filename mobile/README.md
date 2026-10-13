@@ -7,7 +7,9 @@ Mobilna aplikacija za ESP32 OBD adapter (firmware u `../esp32-obd`):
   proizvođački signali za odabranu marku i model (60 marki, 608 modela iz OBDb)
 - DTC (spremljeni, pending, permanent), freeze frame, readiness monitori,
   Mode 06 testovi, VIN / CAL ID / ECU, brisanje kodova uz potvrdu
-- postavke uređaja (deep sleep), bus scan i dijagnostika, BLE konzola s izvozom
+- postavke uređaja (deep sleep), nadogradnja firmwarea s GitHuba preko BLE-a
+  (Device → Firmware update), bus scan i dijagnostika, BLE konzola s izvozom
+- automatsko ponovno spajanje kad veza padne ili se ESP restartira
 
 ## Pokretanje
 
@@ -38,6 +40,7 @@ učitati signale na ESP: oni ostaju u njegovoj memoriji.
 - `src/hooks/useObdMonitor.ts` – stanje aplikacije i obrada svih poruka s ESP-a
 - `src/services/bleObdClient.ts` – BLE (react-native-ble-plx)
 - `src/services/profileRepository.ts` – popis i preuzimanje profila vozila
+- `src/services/firmwareRepository.ts` – `version.json` i slika firmwarea s GitHuba
 - `src/utils/gunzip.ts` – gzip dekoder (bez dodatnih paketa)
 - `src/data/metrics.generated.ts` – katalog metrika, generira ga
   `tools/gen_app_metrics.py` iz izvornog koda firmwarea

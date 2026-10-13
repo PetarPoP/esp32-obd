@@ -3,6 +3,7 @@ import { Alert, Share } from "react-native";
 
 import { APP_CONFIG } from "../config";
 import { bleObdClient } from "../services/bleObdClient";
+import { downloadFirmware, fetchFirmwareInfo, isNewerVersion, type FirmwareInfo } from "../services/firmwareRepository";
 import {
   extAddBody,
   firmwareKey,
@@ -16,6 +17,7 @@ import type {
   ExtAddMessage,
   MonitorTestMessage,
   ObdCommand,
+  OtaMessage,
   ObdInboundMessage,
   ProtocolMessage,
   ReadinessMessage,
@@ -36,6 +38,17 @@ function timestampPrefix(): string {
   const pad = (n: number, w = 2) => String(n).padStart(w, "0");
   return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}.${pad(d.getMilliseconds(), 3)}`;
 }
+
+export type FirmwareState = {
+  phase: "idle" | "checking" | "up_to_date" | "available" | "downloading" | "uploading" | "installing" | "done" | "error";
+  message: string;
+  progress: number; // 0..1 while downloading / uploading
+  latest: FirmwareInfo | null;
+};
+
+const OTA_READY_TIMEOUT_MS = 8000;
+const OTA_DONE_TIMEOUT_MS = 20000;
+const RECONNECT_DELAY_MS = 5000;
 
 export type ExtLoadState = { running: boolean; sent: number; total: number; failed: string[] };
 
@@ -72,6 +85,9 @@ export function useObdMonitor() {
   const extWaiter = useRef<((msg: ExtAddMessage | null) => void) | null>(null);
   const extListBuffer = useRef<string[]>([]);
   const capabilityBuffer = useRef<{ supported: string[]; missing: string[] }>({ supported: [], missing: [] });
+
+  const [firmware, setFirmware] = useState<FirmwareState>({ phase: "idle", message: "", progress: 0, latest: null });
+  const otaWaiter = useRef<((msg: OtaMessage) => void) | null>(null);
 
   const [busScanResults, setBusScanResults] = useState<BusScanResultMessage[]>([]);
   const [busScanRunning, setBusScanRunning] = useState(false);
@@ -205,6 +221,9 @@ export function useObdMonitor() {
         case "ext_add":
           extWaiter.current?.(msg);
           return;
+        case "ota":
+          otaWaiter.current?.(msg);
+          return;
         case "ext_list":
           if (msg.part === 1) extListBuffer.current = [];
           extListBuffer.current.push(...msg.keys);
@@ -264,6 +283,13 @@ export function useObdMonitor() {
     return () => bleObdClient.disconnect();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Reconnect automatically after the link drops (out of range, ESP restart after an update).
+  useEffect(() => {
+    if (connected || connecting) return;
+    const id = setTimeout(() => void connect(), RECONNECT_DELAY_MS);
+    return () => clearTimeout(id);
+  }, [connected, connecting, connect]);
 
   // Push the link configuration whenever the connection or the vehicle mode changes.
   useEffect(() => {
@@ -355,6 +381,88 @@ export function useObdMonitor() {
     await sendCommand("ext_clear");
   }, [sendCommand]);
 
+  const waitForOta = (accept: OtaMessage["status"][], timeoutMs: number) =>
+    new Promise<OtaMessage | null>((resolve) => {
+      const timer = setTimeout(() => {
+        otaWaiter.current = null;
+        resolve(null);
+      }, timeoutMs);
+      otaWaiter.current = (msg) => {
+        if (msg.status === "error" || msg.status === "aborted" || accept.includes(msg.status)) {
+          clearTimeout(timer);
+          otaWaiter.current = null;
+          resolve(msg);
+        }
+      };
+    });
+
+  const checkFirmware = useCallback(async () => {
+    setFirmware({ phase: "checking", message: "Checking GitHub…", progress: 0, latest: null });
+    try {
+      const info = await fetchFirmwareInfo();
+      const newer = isNewerVersion(info.version, device?.fw);
+      setFirmware({
+        phase: newer ? "available" : "up_to_date",
+        message: newer
+          ? `Version ${info.version} is available (installed: ${device?.fw ?? "unknown"}).`
+          : `Firmware ${device?.fw ?? info.version} is up to date.`,
+        progress: 0,
+        latest: info,
+      });
+    } catch (e) {
+      setFirmware({ phase: "error", message: (e as Error).message, progress: 0, latest: null });
+    }
+  }, [device]);
+
+  /** Downloads the firmware and writes it to the ESP over BLE; the ESP verifies the MD5 and restarts. */
+  const installFirmware = useCallback(async () => {
+    const info = firmware.latest;
+    if (!info || !connected) return;
+    const fail = async (message: string, abort: boolean) => {
+      if (abort) await sendCommand("ota_abort");
+      setFirmware({ phase: "error", message, progress: 0, latest: info });
+    };
+    try {
+      setFirmware({ phase: "downloading", message: "Downloading firmware…", progress: 0, latest: info });
+      const image = await downloadFirmware(info);
+
+      await sendCommand("stop_stream");
+      const ready = waitForOta(["ready"], OTA_READY_TIMEOUT_MS);
+      await sendCommand("ota_begin", { size: image.length, md5: info.md5 });
+      const begin = await ready;
+      if (!begin || begin.status !== "ready") {
+        await fail(`ESP refused the update (${begin?.reason ?? "no answer"})`, false);
+        return;
+      }
+
+      const chunk = Math.max(20, Math.min(240, bleObdClient.mtu() - 3));
+      for (let offset = 0, n = 0; offset < image.length; offset += chunk, n++) {
+        await bleObdClient.writeOtaChunk(image.subarray(offset, Math.min(offset + chunk, image.length)));
+        if (n % 8 === 7) await new Promise((r) => setTimeout(r, 15)); // let the ESP drain its BLE queue
+        if (n % 20 === 0) {
+          setFirmware({ phase: "uploading", message: "Uploading to ESP…", progress: offset / image.length, latest: info });
+        }
+      }
+
+      setFirmware({ phase: "installing", message: "Verifying and installing…", progress: 1, latest: info });
+      const done = waitForOta(["done"], OTA_DONE_TIMEOUT_MS);
+      await sendCommand("ota_end");
+      const result = await done;
+      if (result?.status === "done") {
+        setFirmware({
+          phase: "done",
+          message: `Version ${info.version} installed. The ESP is restarting; the app reconnects by itself.`,
+          progress: 1,
+          latest: info,
+        });
+      } else {
+        await fail(`Update failed (${result?.reason ?? "no answer"}). The old firmware stays active.`, true);
+      }
+    } catch (e) {
+      await fail((e as Error).message, true);
+    }
+  }, [connected, firmware.latest, sendCommand]);
+
   const setSleepAfter = useCallback(
     (seconds: number) => void sendCommand("set_power", { sleep_after_s: seconds }),
     [sendCommand]
@@ -422,6 +530,9 @@ export function useObdMonitor() {
     extValues,
     extLoad,
     extOnDevice,
+    firmware,
+    checkFirmware,
+    installFirmware,
     loadExtSignals,
     clearExtSignals,
     busScanResults,

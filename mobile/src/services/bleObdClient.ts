@@ -64,6 +64,26 @@ class BleObdClient {
     return this.device !== null;
   }
 
+  /** Negotiated ATT MTU (23 until the MTU request has completed). */
+  mtu(): number {
+    return this.device?.mtu ?? 23;
+  }
+
+  /** Writes one firmware chunk (write without response) to the OTA data characteristic. */
+  async writeOtaChunk(bytes: Uint8Array): Promise<void> {
+    if (!this.device) {
+      throw new Error("not connected");
+    }
+    let binary = "";
+    for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+    await this.manager.writeCharacteristicWithoutResponseForDevice(
+      this.device.id,
+      BLE_CONFIG.serviceUuid,
+      BLE_CONFIG.otaDataUuid,
+      b64Encode(binary)
+    );
+  }
+
   /** Sends one JSON command; `fields` are merged into {"command": ...}. */
   async sendCommand(command: ObdCommand, fields?: Record<string, unknown>): Promise<void> {
     if (!this.device) {
