@@ -20,53 +20,19 @@ constexpr uint8_t kPciSingle = 0x0;
 constexpr uint8_t kPciFirst = 0x1;
 constexpr uint8_t kPciConsecutive = 0x2;
 
-// K-line addressing (tester 0xF1, functional OBD target 0x33 / 0x6A).
-constexpr uint8_t kTesterAddress = 0xF1;
-constexpr uint8_t kKwpTarget = 0x33;
-constexpr uint8_t kIso9141Header1 = 0x68;
-constexpr uint8_t kIso9141Header2 = 0x6A;
-constexpr uint8_t kIso9141ResponseHeader1 = 0x48;
-constexpr uint8_t kIso9141ResponseHeader2 = 0x6B;
-constexpr uint8_t kSlowInitAddress = 0x33;
-constexpr uint8_t kKwpStartCommunication = 0x81;
-constexpr uint8_t kKwpTesterPresent = 0x3E;
-
 constexpr uint8_t kNegativeResponse = 0x7F;
 constexpr uint8_t kNrcResponsePending = 0x78;
 constexpr uint8_t kPositiveResponseOffset = 0x40;
 
-// Response windows (ms).
+// Response windows (ms). ISO 15765-4 allows ECUs 50 ms (P2) to answer.
 constexpr uint32_t kCanDefaultTimeoutMs = 150;
 constexpr uint32_t kCanMultiFrameTimeoutMs = 1000;
 constexpr uint32_t kCanConsecutiveFrameTimeoutMs = 200;
-constexpr uint32_t kKLineDefaultTimeoutMs = 300;
-constexpr uint32_t kKLineNextMessageTimeoutMs = 100;  // P2 max 50 ms + margin
 constexpr uint32_t kResponsePendingTimeoutMs = 5000;  // P2* max
-constexpr uint32_t kKLineKeepAliveMs = 2000;          // well under P3 max (5 s)
 constexpr uint32_t kCanListenWindowMs = 250;
-
-enum class ResponseVerdict : uint8_t { kIgnore, kPositive, kPending, kNegative };
-
-bool IsCanProtocol(ObdProtocol p) {
-  return p == ObdProtocol::kCan11_500 || p == ObdProtocol::kCan29_500 ||
-         p == ObdProtocol::kCan11_250 || p == ObdProtocol::kCan29_250 ||
-         p == ObdProtocol::kCan11Custom;
-}
 
 bool IsExtendedCan(ObdProtocol p) {
   return p == ObdProtocol::kCan29_500 || p == ObdProtocol::kCan29_250;
-}
-
-bool IsKLineProtocol(ObdProtocol p) {
-  return p == ObdProtocol::kIso9141 || p == ObdProtocol::kKwpSlow || p == ObdProtocol::kKwpFast;
-}
-
-uint8_t Checksum(const uint8_t* data, uint8_t len) {
-  uint8_t sum = 0;
-  for (uint8_t i = 0; i < len; ++i) {
-    sum = static_cast<uint8_t>(sum + data[i]);
-  }
-  return sum;
 }
 
 bool IsTimeBefore(uint32_t now, uint32_t deadline) { return (int32_t)(now - deadline) < 0; }
@@ -100,6 +66,12 @@ const char* ObdProtocolId(ObdProtocol protocol) {
   }
 }
 
+bool IsCanProtocol(ObdProtocol p) {
+  return p == ObdProtocol::kCan11_500 || p == ObdProtocol::kCan29_500 ||
+         p == ObdProtocol::kCan11_250 || p == ObdProtocol::kCan29_250 ||
+         p == ObdProtocol::kCan11Custom;
+}
+
 bool ParseObdProtocol(const String& text, ObdProtocol& out_protocol, bool& out_auto) {
   out_auto = false;
   if (text.length() == 0 || text == "auto" || text == "0") {
@@ -117,10 +89,8 @@ bool ParseObdProtocol(const String& text, ObdProtocol& out_protocol, bool& out_a
   return false;
 }
 
-ObdTransport::ObdTransport(drivers::TwaiDriver& twai_driver, drivers::KLineDriver& k_line_driver)
-    : twai_driver_(twai_driver),
-      k_line_driver_(k_line_driver),
-      diagnostic_profile_(DiagnosticProfile::kObdMode01) {}
+ObdTransport::ObdTransport(drivers::TwaiDriver& twai_driver)
+    : twai_driver_(twai_driver), diagnostic_profile_(DiagnosticProfile::kObdMode01) {}
 
 void ObdTransport::SetDiagnosticProfile(DiagnosticProfile profile) {
   diagnostic_profile_ = profile;
@@ -154,9 +124,9 @@ bool ObdTransport::IsConnected() const { return protocol_ != ObdProtocol::kNone;
 
 bool ObdTransport::IsCan() const { return IsCanProtocol(protocol_); }
 
-bool ObdTransport::IsKLine() const { return IsKLineProtocol(protocol_); }
-
 uint16_t ObdTransport::ConsecutiveFailures() const { return consecutive_failures_; }
+
+uint8_t ObdTransport::MessageCount() const { return message_count_; }
 
 const ObdMessage& ObdTransport::Message(uint8_t index) const {
   return messages_[index < kObdMaxMessages ? index : 0];
@@ -165,13 +135,11 @@ const ObdMessage& ObdTransport::Message(uint8_t index) const {
 uint8_t ObdTransport::LastNegativeResponseCode() const { return last_nrc_; }
 
 void ObdTransport::Disconnect() {
-  k_line_driver_.End();
   protocol_ = ObdProtocol::kNone;
   ClearSupportedPids();
 }
 
 void ObdTransport::UseCanUnverified() {
-  k_line_driver_.End();
   ClearSupportedPids();
   consecutive_failures_ = 0;
   if (twai_driver_.IsListenOnly()) {
@@ -220,6 +188,8 @@ ObdProtocol ObdTransport::AutoDetect(ProgressCallback progress) {
   }
 
   // 2) Active probing with 01 00, in ELM327 order (11-bit before 29-bit).
+  //    Many cars keep the OBD port silent until asked, so a baud without
+  //    traffic is still probed when no baud had any.
   for (const BaudProbe& probe : bauds) {
     if (any_traffic && probe.frames == 0) {
       continue;  // never transmit at a baud that is known to be wrong
@@ -238,20 +208,6 @@ ObdProtocol ObdTransport::AutoDetect(ProgressCallback progress) {
     }
   }
 
-  // 3) K-line, when a transceiver is fitted. Some pre-2008 cars carry
-  //    non-OBD CAN traffic on pins 6/14 but answer OBD only on the K-line.
-  if (drivers::KLineDriver::IsAvailable()) {
-    const ObdProtocol candidates[2] = {ObdProtocol::kKwpFast, ObdProtocol::kIso9141};
-    for (ObdProtocol candidate : candidates) {
-      if (progress != nullptr) {
-        progress("probe", candidate);
-      }
-      if (Connect(candidate)) {
-        return protocol_;
-      }
-    }
-  }
-
   // Nothing answered: leave the controller passive.
   twai_driver_.BeginAt(500, /*listen_only=*/true);
   return ObdProtocol::kNone;
@@ -260,20 +216,10 @@ ObdProtocol ObdTransport::AutoDetect(ProgressCallback progress) {
 bool ObdTransport::Connect(ObdProtocol protocol) {
   Disconnect();
   consecutive_failures_ = 0;
-  if (diagnostic_profile_ != DiagnosticProfile::kObdMode01) {
+  if (diagnostic_profile_ != DiagnosticProfile::kObdMode01 || !IsCanProtocol(protocol) ||
+      protocol == ObdProtocol::kCan11Custom) {
     return false;
   }
-  if (IsCanProtocol(protocol) && protocol != ObdProtocol::kCan11Custom) {
-    return ConnectCan(protocol);
-  }
-  if (IsKLineProtocol(protocol)) {
-    return ConnectKLine(protocol);
-  }
-  // J1850 PWM/VPW need a bus driver this board does not have.
-  return false;
-}
-
-bool ObdTransport::ConnectCan(ObdProtocol protocol) {
   const bool is_500 = protocol == ObdProtocol::kCan11_500 || protocol == ObdProtocol::kCan29_500;
   if (!twai_driver_.BeginAt(is_500 ? 500 : 250, /*listen_only=*/false)) {
     return false;
@@ -292,74 +238,9 @@ bool ObdTransport::ConnectCan(ObdProtocol protocol) {
   return true;
 }
 
-bool ObdTransport::ConnectKLine(ObdProtocol protocol) {
-  if (!drivers::KLineDriver::IsAvailable()) {
-    return false;
-  }
-  // Keep the CAN controller passive while the K-line is in use.
-  twai_driver_.BeginAt(twai_driver_.BaudKbps(), /*listen_only=*/true);
-
-  if (protocol == ObdProtocol::kKwpFast) {
-    if (!k_line_driver_.FastInitPattern()) {
-      return false;
-    }
-    protocol_ = ObdProtocol::kKwpFast;
-    const uint8_t start_communication = kKwpStartCommunication;
-    if (Request(&start_communication, 1, /*wait_for_all=*/true) == 0) {
-      Disconnect();
-      return false;
-    }
-  } else {
-    // One 5 baud init serves both ISO 9141-2 and KWP2000 slow init; the key
-    // bytes tell them apart (KWP2000 uses KB1 = 0x8F).
-    uint8_t kb1 = 0;
-    uint8_t kb2 = 0;
-    if (!k_line_driver_.SlowInit(kSlowInitAddress, kb1, kb2)) {
-      return false;
-    }
-    protocol_ = (kb1 == 0x8F) ? ObdProtocol::kKwpSlow : ObdProtocol::kIso9141;
-  }
-
-  if (!VerifyWithPid00()) {
-    Disconnect();
-    return false;
-  }
-  DiscoverSupportedPids();
-  return true;
-}
-
 bool ObdTransport::VerifyWithPid00() {
   const uint8_t request[2] = {0x01, 0x00};
   return Request(request, sizeof(request), /*wait_for_all=*/true) > 0;
-}
-
-uint8_t ObdTransport::Request(const uint8_t* request, uint8_t request_len, bool wait_for_all,
-                              uint32_t timeout_ms) {
-  message_count_ = 0;
-  last_nrc_ = 0;
-  if (request == nullptr || request_len == 0 || protocol_ == ObdProtocol::kNone ||
-      diagnostic_profile_ != DiagnosticProfile::kObdMode01) {
-    return 0;
-  }
-  uint8_t count = 0;
-  if (IsCan()) {
-    count = RequestCan(request, request_len, wait_for_all,
-                       timeout_ms == 0 ? kCanDefaultTimeoutMs : timeout_ms);
-  } else if (IsKLine()) {
-    // K-line responses are always read to the end so the next request never
-    // collides with a slower ECU that is still answering.
-    count = RequestKLine(request, request_len,
-                         timeout_ms == 0 ? kKLineDefaultTimeoutMs : timeout_ms);
-  }
-  last_request_ms_ = millis();
-  if (count == 0) {
-    if (consecutive_failures_ < 0xFFFF) {
-      ++consecutive_failures_;
-    }
-  } else {
-    consecutive_failures_ = 0;
-  }
-  return count;
 }
 
 bool ObdTransport::AcceptResponse(const uint8_t* request, uint8_t request_len,
@@ -380,12 +261,20 @@ bool ObdTransport::AcceptResponse(const uint8_t* request, uint8_t request_len,
   if (data[0] != static_cast<uint8_t>(request[0] + kPositiveResponseOffset)) {
     return false;
   }
-  // Modes 01, 02 and 09 echo the PID; make sure the answer is for our PID.
+  // Modes 01, 02 and 09 echo the PID; make sure the answer is for one of ours.
+  // A multi-PID Mode 01 request may be answered in any order or partially.
   const uint8_t mode = request[0];
   if ((mode == 0x01 || mode == 0x02 || mode == 0x09) && request_len >= 2) {
-    if (len < 2 || data[1] != request[1]) {
+    if (len < 2) {
       return false;
     }
+    const uint8_t pid_count = (mode == 0x01) ? request_len - 1 : 1;
+    for (uint8_t i = 0; i < pid_count; ++i) {
+      if (data[1] == request[1 + i]) {
+        return true;
+      }
+    }
+    return false;
   }
   return true;
 }
@@ -400,10 +289,16 @@ void ObdTransport::StoreMessage(uint8_t ecu, const uint8_t* data, uint8_t len) {
   memcpy(msg.data, data, msg.len);
 }
 
-uint8_t ObdTransport::RequestCan(const uint8_t* request, uint8_t request_len, bool wait_for_all,
-                                 uint32_t timeout_ms) {
-  if (request_len > 7) {
+uint8_t ObdTransport::Request(const uint8_t* request, uint8_t request_len, bool wait_for_all,
+                              uint32_t timeout_ms, CompletionCallback done, void* done_context) {
+  message_count_ = 0;
+  last_nrc_ = 0;
+  if (request == nullptr || request_len == 0 || request_len > 7 ||
+      protocol_ == ObdProtocol::kNone || diagnostic_profile_ != DiagnosticProfile::kObdMode01) {
     return 0;  // multi-frame requests are never needed for OBD-II services
+  }
+  if (timeout_ms == 0) {
+    timeout_ms = kCanDefaultTimeoutMs;
   }
   const bool extended = IsExtendedCan(protocol_);
 
@@ -418,6 +313,7 @@ uint8_t ObdTransport::RequestCan(const uint8_t* request, uint8_t request_len, bo
   memcpy(&sf[1], request, request_len);
   if (!twai_driver_.SendFrame(extended ? kCan29FunctionalId : kCan11FunctionalId, sf, sizeof(sf),
                               50, extended, probing_)) {
+    ++consecutive_failures_;
     return 0;
   }
 
@@ -435,8 +331,14 @@ uint8_t ObdTransport::RequestCan(const uint8_t* request, uint8_t request_len, bo
     slot.active = false;
   }
 
+  auto finished = [&]() {
+    return message_count_ >= kObdMaxMessages || !wait_for_all ||
+           (done != nullptr && done(*this, done_context));
+  };
+
   uint32_t deadline = millis() + timeout_ms;
-  while (IsTimeBefore(millis(), deadline)) {
+  bool complete = false;
+  while (!complete && IsTimeBefore(millis(), deadline)) {
     if (!twai_driver_.ReadFrame(frame, 5)) {
       continue;
     }
@@ -467,9 +369,7 @@ uint8_t ObdTransport::RequestCan(const uint8_t* request, uint8_t request_len, bo
       }
       if (AcceptResponse(request, request_len, &frame.data[1], len, deadline)) {
         StoreMessage(ecu, &frame.data[1], len);
-        if (!wait_for_all || message_count_ >= kObdMaxMessages) {
-          return message_count_;
-        }
+        complete = finished();
       }
     } else if (pci_type == kPciFirst) {
       if (frame.dlc < 8) {
@@ -477,9 +377,14 @@ uint8_t ObdTransport::RequestCan(const uint8_t* request, uint8_t request_len, bo
       }
       RxSlot* slot = nullptr;
       for (RxSlot& candidate : slots) {
-        if (!candidate.active || candidate.id == frame.id) {
-          slot = &candidate;
+        if (candidate.active && candidate.id == frame.id) {
+          slot = &candidate;  // the ECU restarted its answer
           break;
+        }
+      }
+      for (RxSlot& candidate : slots) {
+        if (slot == nullptr && !candidate.active) {
+          slot = &candidate;
         }
       }
       if (slot == nullptr) {
@@ -529,9 +434,7 @@ uint8_t ObdTransport::RequestCan(const uint8_t* request, uint8_t request_len, bo
               slot.expected > kObdMessageMaxLen ? kObdMessageMaxLen : static_cast<uint8_t>(slot.expected);
           if (AcceptResponse(request, request_len, slot.buf, len, deadline)) {
             StoreMessage(ecu, slot.buf, len);
-            if (!wait_for_all || message_count_ >= kObdMaxMessages) {
-              return message_count_;
-            }
+            complete = finished();
           }
         } else {
           const uint32_t cf_deadline = millis() + kCanConsecutiveFrameTimeoutMs;
@@ -543,107 +446,13 @@ uint8_t ObdTransport::RequestCan(const uint8_t* request, uint8_t request_len, bo
       }
     }
   }
-  return message_count_;
-}
 
-bool ObdTransport::ParseKLineFrame(const uint8_t* raw, uint8_t raw_len, uint8_t& consumed,
-                                   uint8_t& ecu, const uint8_t*& data, uint8_t& data_len) const {
-  consumed = raw_len;
-  if (protocol_ == ObdProtocol::kIso9141) {
-    // 48 6B <src> <data...> <cs>; framing comes from the inter-message gap.
-    if (raw_len < 5 || raw[0] != kIso9141ResponseHeader1 || raw[1] != kIso9141ResponseHeader2) {
-      return false;
+  if (message_count_ == 0) {
+    if (consecutive_failures_ < 0xFFFF) {
+      ++consecutive_failures_;
     }
-    if (Checksum(raw, raw_len - 1) != raw[raw_len - 1]) {
-      return false;
-    }
-    ecu = raw[2];
-    data = &raw[3];
-    data_len = raw_len - 4;
-    return true;
-  }
-
-  // KWP2000: <fmt> [<tgt> <src>] [<len>] <data...> <cs>
-  if (raw_len < 3) {
-    return false;
-  }
-  const uint8_t fmt = raw[0];
-  const bool has_address = (fmt & 0xC0) != 0;
-  uint8_t header = 1 + (has_address ? 2 : 0);
-  uint8_t len = fmt & 0x3F;
-  if (len == 0) {
-    if (raw_len <= header) {
-      return false;
-    }
-    len = raw[header];
-    ++header;
-  }
-  const uint16_t total = static_cast<uint16_t>(header) + len + 1;
-  if (len == 0 || total > raw_len) {
-    return false;
-  }
-  consumed = static_cast<uint8_t>(total);
-  if (Checksum(raw, total - 1) != raw[total - 1]) {
-    return false;
-  }
-  if (has_address && raw[1] != kTesterAddress) {
-    return false;
-  }
-  ecu = has_address ? raw[2] : 0;
-  data = &raw[header];
-  data_len = len;
-  return true;
-}
-
-uint8_t ObdTransport::RequestKLine(const uint8_t* request, uint8_t request_len,
-                                   uint32_t timeout_ms) {
-  if (request_len > 7) {
-    return 0;
-  }
-  uint8_t out[3 + 7 + 1];
-  uint8_t n = 0;
-  if (protocol_ == ObdProtocol::kIso9141) {
-    out[n++] = kIso9141Header1;
-    out[n++] = kIso9141Header2;
   } else {
-    out[n++] = 0xC0 | request_len;
-    out[n++] = kKwpTarget;
-  }
-  out[n++] = kTesterAddress;
-  memcpy(&out[n], request, request_len);
-  n += request_len;
-  out[n] = Checksum(out, n);
-  ++n;
-  if (!k_line_driver_.WriteMessage(out, n)) {
-    return 0;
-  }
-
-  uint32_t wait_ms = timeout_ms;
-  while (message_count_ < kObdMaxMessages) {
-    uint8_t raw[80];
-    const uint8_t raw_len = k_line_driver_.ReadMessage(raw, sizeof(raw), wait_ms);
-    if (raw_len == 0) {
-      break;
-    }
-    wait_ms = kKLineNextMessageTimeoutMs;
-    uint8_t offset = 0;
-    while (offset < raw_len) {
-      uint8_t consumed = 0;
-      uint8_t ecu = 0;
-      const uint8_t* data = nullptr;
-      uint8_t data_len = 0;
-      const bool ok = ParseKLineFrame(&raw[offset], raw_len - offset, consumed, ecu, data, data_len);
-      offset += consumed == 0 ? raw_len : consumed;
-      if (!ok) {
-        continue;
-      }
-      uint32_t deadline = 0;
-      if (AcceptResponse(request, request_len, data, data_len, deadline)) {
-        StoreMessage(ecu, data, data_len);
-      } else if (deadline != 0) {
-        wait_ms = kResponsePendingTimeoutMs;  // ECU asked for more time (NRC 0x78)
-      }
-    }
+    consecutive_failures_ = 0;
   }
   return message_count_;
 }
@@ -737,60 +546,9 @@ String ObdTransport::SupportedPidsHex() const {
   return hex;
 }
 
-String ObdTransport::ReadVin() {
-  const uint8_t request[2] = {0x09, 0x02};
-  const uint8_t count = Request(request, sizeof(request), /*wait_for_all=*/true, IsCan() ? 300 : 0);
-  if (count == 0) {
-    return String();
-  }
-  String vin;
-  if (IsCan()) {
-    // 49 02 <count> <17 ASCII bytes>
-    const ObdMessage& msg = messages_[0];
-    for (uint8_t i = 3; i < msg.len; ++i) {
-      if (isAlphaNumeric(msg.data[i])) {
-        vin += static_cast<char>(msg.data[i]);
-      }
-    }
-  } else {
-    // K-line: 49 02 <seq> <4 bytes>, several messages, sequence 1..5.
-    for (uint8_t seq = 1; seq <= 5; ++seq) {
-      for (uint8_t m = 0; m < count; ++m) {
-        const ObdMessage& msg = messages_[m];
-        if (msg.len < 7 || msg.data[2] != seq) {
-          continue;
-        }
-        for (uint8_t i = 3; i < 7; ++i) {
-          if (isAlphaNumeric(msg.data[i])) {
-            vin += static_cast<char>(msg.data[i]);
-          }
-        }
-        break;
-      }
-    }
-  }
-  if (vin.length() > 17) {
-    vin = vin.substring(vin.length() - 17);
-  }
-  return vin;
-}
-
 void ObdTransport::Tick() {
-  if (protocol_ == ObdProtocol::kNone) {
-    return;
-  }
   if (IsCan()) {
     twai_driver_.RecoverIfBusOff();
-    return;
-  }
-  if (IsKLine() && millis() - last_request_ms_ > kKLineKeepAliveMs) {
-    if (protocol_ == ObdProtocol::kIso9141) {
-      const uint8_t keep_alive[2] = {0x01, 0x00};
-      Request(keep_alive, sizeof(keep_alive), /*wait_for_all=*/true);
-    } else {
-      const uint8_t keep_alive = kKwpTesterPresent;
-      Request(&keep_alive, 1, /*wait_for_all=*/true);
-    }
   }
 }
 

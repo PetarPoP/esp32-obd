@@ -20,6 +20,50 @@ BLECharacteristic* g_response_char = nullptr;
 BLECharacteristic* g_command_char = nullptr;
 TransportBle::CommandHandler g_command_handler = nullptr;
 
+// Every command the firmware understands. Order matters only for the
+// substring fallback: names that contain another name come first.
+const char* const kKnownCommands[] = {
+    "start_stream",      "stop_stream",  "read_dtc",     "clear_dtc",
+    "read_freeze_frame", "vehicle_info", "probe_capabilities", "set_link",
+    "detect_protocol",   "bus_diag",     "bus_scan",
+};
+
+// Value of a "key":"value" string field, or empty.
+String JsonStringField(const String& payload, const char* key) {
+  const int key_pos = payload.indexOf(key);
+  if (key_pos < 0) {
+    return String();
+  }
+  const int colon = payload.indexOf(':', key_pos);
+  const int open_quote = colon < 0 ? -1 : payload.indexOf('"', colon);
+  const int close_quote = open_quote < 0 ? -1 : payload.indexOf('"', open_quote + 1);
+  if (close_quote < 0) {
+    return String();
+  }
+  return payload.substring(open_quote + 1, close_quote);
+}
+
+// Finds the command: an explicit "cmd"/"command" field wins; otherwise the
+// first known command name that appears anywhere in the payload (the
+// original wire format, e.g. a bare "start_stream").
+String DetectCommand(const String& payload) {
+  const char* const kCommandKeys[] = {"\"cmd\"", "\"command\"", "\"action\"", "\"type\""};
+  for (const char* key : kCommandKeys) {
+    const String value = JsonStringField(payload, key);
+    for (const char* known : kKnownCommands) {
+      if (value == known) {
+        return value;
+      }
+    }
+  }
+  for (const char* known : kKnownCommands) {
+    if (payload.indexOf(known) >= 0) {
+      return known;
+    }
+  }
+  return String();
+}
+
 class ServerCallbacks : public BLEServerCallbacks {
   void onConnect(BLEServer* p_server) override {
     g_ble_connected = true;
@@ -44,29 +88,16 @@ class CommandCallbacks : public BLECharacteristicCallbacks {
     String status = "ok";
     String reason = "";
 
-    if (payload.indexOf("start_stream") >= 0) {
-      command = "start_stream";
-    } else if (payload.indexOf("stop_stream") >= 0) {
-      command = "stop_stream";
-    } else if (payload.indexOf("read_dtc") >= 0) {
-      command = "read_dtc";
-    } else if (payload.indexOf("clear_dtc") >= 0) {
-      command = "clear_dtc";
-      status = "locked";
-      reason = "safety_lock";
-    } else if (payload.indexOf("probe_capabilities") >= 0) {
-      command = "probe_capabilities";
-    } else if (payload.indexOf("set_link") >= 0) {
-      command = "set_link";
-    } else if (payload.indexOf("bus_diag") >= 0) {
-      command = "bus_diag";
-    } else if (payload.indexOf("bus_scan") >= 0) {
-      command = "bus_scan";
-    } else if (payload.indexOf("detect_protocol") >= 0) {
-      command = "detect_protocol";
+    const String detected = DetectCommand(payload);
+    if (detected.length() > 0) {
+      command = detected;
     } else {
       status = "error";
       reason = "unsupported_command";
+    }
+    if (command == "clear_dtc") {
+      status = "locked";
+      reason = "safety_lock";
     }
 
     if (g_command_handler != nullptr) {
@@ -118,15 +149,7 @@ bool TransportBle::Begin() {
 
   service->start();
   server->getAdvertising()->start();
-
-  NotifyResponse("{\"type\":\"status\",\"connected\":true,\"mode\":\"listen_only\","
-                 "\"signal\":-55,\"stream_active\":true,\"ts\":" +
-                 String(millis()) + "}");
-  NotifyResponse("{\"type\":\"capability\",\"supported_metrics\":[\"rpm\","
-                 "\"coolant_c\",\"throttle_pct\",\"speed_kmh\"],\"missing_metrics\":[],"
-                 "\"confirmed_from_vehicle\":false,"
-                 "\"ts\":" +
-                 String(millis()) + "}");
+  // The real status and capability snapshots are published by setup().
   return true;
 }
 

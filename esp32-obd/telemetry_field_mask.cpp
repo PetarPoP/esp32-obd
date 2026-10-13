@@ -1,23 +1,27 @@
 #include "telemetry_field_mask.h"
 
-#include "pid_decoder.h"
-
 namespace obd {
 namespace core {
 
 namespace {
 
-void ApplyMetricToken(const String& token, uint32_t& mask) {
-  if (token == "all") {
-    mask |= kTelemetryFieldAll;
-    return;
-  }
+void SelectByKey(const String& key, BitSet256& fields) {
   for (size_t i = 0; i < kPidCatalogueLen; ++i) {
-    if (token == kPidCatalogue[i].json_key) {
-      mask |= kPidCatalogue[i].mask_bit;
+    if (key == kPidCatalogue[i].json_key) {
+      fields.Set(static_cast<uint8_t>(i));
       return;
     }
   }
+}
+
+void ApplyMetricToken(const String& token, BitSet256& fields) {
+  if (token == "all") {
+    for (size_t i = 0; i < kPidCatalogueLen; ++i) {
+      fields.Set(static_cast<uint8_t>(i));
+    }
+    return;
+  }
+  SelectByKey(token, fields);
 }
 
 String StripJsonQuotes(String token) {
@@ -30,40 +34,36 @@ String StripJsonQuotes(String token) {
 
 }  // namespace
 
-uint32_t ParseTelemetryFieldMask(const String& raw_json) {
+void DefaultTelemetryFields(BitSet256& out_fields) {
+  out_fields.Clear();
+  SelectByKey("rpm", out_fields);
+  SelectByKey("coolant_c", out_fields);
+  SelectByKey("throttle_pct", out_fields);
+  SelectByKey("speed_kmh", out_fields);
+}
+
+void ParseTelemetryFields(const String& raw_json, BitSet256& out_fields) {
+  out_fields.Clear();
   const int key_pos = raw_json.indexOf("\"metrics\"");
-  if (key_pos < 0) {
-    return kTelemetryFieldDefault;
-  }
-
-  const int open_bracket = raw_json.indexOf('[', key_pos);
-  if (open_bracket < 0) {
-    return kTelemetryFieldDefault;
-  }
-
-  const int close_bracket = raw_json.indexOf(']', open_bracket);
-  if (close_bracket < 0 || close_bracket <= open_bracket) {
-    return kTelemetryFieldDefault;
-  }
-
-  uint32_t mask = 0;
-  int cursor = open_bracket + 1;
-  while (cursor < close_bracket) {
-    const int comma = raw_json.indexOf(',', cursor);
-    const int end = (comma >= 0 && comma < close_bracket) ? comma : close_bracket;
-    if (end > cursor) {
-      ApplyMetricToken(StripJsonQuotes(raw_json.substring(cursor, end)), mask);
+  const int open_bracket = key_pos < 0 ? -1 : raw_json.indexOf('[', key_pos);
+  const int close_bracket = open_bracket < 0 ? -1 : raw_json.indexOf(']', open_bracket);
+  if (close_bracket > open_bracket) {
+    int cursor = open_bracket + 1;
+    while (cursor < close_bracket) {
+      const int comma = raw_json.indexOf(',', cursor);
+      const int end = (comma >= 0 && comma < close_bracket) ? comma : close_bracket;
+      if (end > cursor) {
+        ApplyMetricToken(StripJsonQuotes(raw_json.substring(cursor, end)), out_fields);
+      }
+      if (comma < 0 || comma >= close_bracket) {
+        break;
+      }
+      cursor = comma + 1;
     }
-    if (comma < 0 || comma >= close_bracket) {
-      break;
-    }
-    cursor = comma + 1;
   }
-
-  if (mask == 0) {
-    return kTelemetryFieldDefault;
+  if (out_fields.Empty()) {
+    DefaultTelemetryFields(out_fields);
   }
-  return mask;
 }
 
 }  // namespace core

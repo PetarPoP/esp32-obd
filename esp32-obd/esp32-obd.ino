@@ -4,7 +4,6 @@
 #include "transport_ble.h"
 #include "can_phy_driver.h"
 #include "twai_driver.h"
-#include "k_line_driver.h"
 #include "dtc_decoder.h"
 #include "obd_transport.h"
 #include "pid_decoder.h"
@@ -53,15 +52,15 @@ String ParseStringFieldLocal(const String& payload, const char* key) {
 obd::safety::SafetyGuard g_safety_guard;
 obd::drivers::CanPhyDriver g_can_phy;
 obd::drivers::TwaiDriver g_twai;
-obd::drivers::KLineDriver g_kline;
-obd::core::ObdTransport g_transport(g_twai, g_kline);
+obd::core::ObdTransport g_transport(g_twai);
 obd::core::PidDecoder g_pid_decoder;
 obd::core::DtcDecoder g_dtc_decoder;
 obd::app_link::TransportBle g_ble;
 obd::services::TelemetryService g_telemetry(g_transport, g_pid_decoder, g_ble);
 obd::services::RawFrameStreamService g_raw_frames(g_ble);
 obd::services::SmartBmsService g_smart_bms(g_ble, g_twai);
-obd::services::DiagnosticsService g_diagnostics(g_transport, g_dtc_decoder, g_ble, g_safety_guard);
+obd::services::DiagnosticsService g_diagnostics(g_transport, g_dtc_decoder, g_pid_decoder, g_ble,
+                                                g_safety_guard);
 obd::services::ConnectionManager g_connection_manager;
 obd::services::ObdSchedulerService g_scheduler(g_transport, g_telemetry, g_raw_frames, g_smart_bms);
 
@@ -140,7 +139,7 @@ void PublishProtocol(bool ok, const char* reason) {
       payload += g_transport.SupportedPidsHex();
       payload += "\"";
     }
-    const String vin = g_transport.ReadVin();
+    const String vin = g_diagnostics.ReadVin();
     if (vin.length() > 0) {
       payload += ",\"vin\":\"";
       payload += vin;
@@ -177,16 +176,10 @@ void RunProtocolDetection(const String& protocol_text) {
     PublishProtocol(false, "profile_not_obd");
     return;
   }
-  if (requested == obd::core::ObdProtocol::kJ1850Pwm ||
-      requested == obd::core::ObdProtocol::kJ1850Vpw) {
+  if (!is_auto && (!obd::core::IsCanProtocol(requested) ||
+                   requested == obd::core::ObdProtocol::kCan11Custom)) {
+    // J1850 and K-line need bus drivers this board does not have.
     PublishProtocol(false, "unsupported_hardware");
-    return;
-  }
-  if ((requested == obd::core::ObdProtocol::kIso9141 ||
-       requested == obd::core::ObdProtocol::kKwpSlow ||
-       requested == obd::core::ObdProtocol::kKwpFast) &&
-      !obd::drivers::KLineDriver::IsAvailable()) {
-    PublishProtocol(false, "k_line_not_fitted");
     return;
   }
 
@@ -400,45 +393,52 @@ void PublishCapabilitiesSnapshot() {
     return;
   }
   // Reports the metrics the vehicle supports (from the PID 00/20/40/...
-  // bitmaps) once a protocol is connected; before that, the firmware catalogue.
-  // Long lists are split into parts so every notify fits the BLE MTU.
+  // bitmaps) once a protocol is connected; before that, the whole firmware
+  // catalogue. The list is split into parts so every notify fits the BLE MTU;
+  // missing_metrics names the original four metrics the vehicle lacks.
   const bool confirmed = g_transport.SupportedPidsKnown();
-  String parts[6];
-  uint8_t part_count = 0;
-  String supported;
   String missing;
-  auto flush_part = [&]() {
-    if (part_count < 6) {
-      parts[part_count++] =
-          "\"supported_metrics\":[" + supported + "],\"missing_metrics\":[" + missing + "]";
-    }
-    supported = "";
-    missing = "";
-  };
+  static const char* const kLegacyMetrics[] = {"rpm", "coolant_c", "throttle_pct", "speed_kmh"};
+  String supported_chunks[24];
+  uint8_t chunk_count = 0;
+  String current;
   for (size_t i = 0; i < obd::core::kPidCatalogueLen; ++i) {
-    const obd::core::PidDescriptor& entry = obd::core::kPidCatalogue[i];
-    if (supported.length() + missing.length() + strlen(entry.json_key) > 140) {
-      flush_part();
+    const obd::core::PidField& field = obd::core::kPidCatalogue[i];
+    bool legacy = false;
+    for (const char* key : kLegacyMetrics) {
+      legacy = legacy || strcmp(key, field.json_key) == 0;
     }
-    String& list = g_transport.IsPidSupported(entry.pid) ? supported : missing;
-    if (list.length() > 0) {
-      list += ",";
+    if (!g_transport.IsPidSupported(field.pid)) {
+      if (legacy) {
+        missing += (missing.length() > 0 ? ",\"" : "\"");
+        missing += field.json_key;
+        missing += "\"";
+      }
+      continue;
     }
-    list += "\"";
-    list += entry.json_key;
-    list += "\"";
+    if (current.length() + strlen(field.json_key) > 150 && chunk_count < 23) {
+      supported_chunks[chunk_count++] = current;
+      current = "";
+    }
+    current += (current.length() > 0 ? ",\"" : "\"");
+    current += field.json_key;
+    current += "\"";
   }
-  flush_part();
-  for (uint8_t i = 0; i < part_count; ++i) {
-    String payload = "{\"type\":\"capability\",";
-    payload += parts[i];
-    payload += ",\"confirmed_from_vehicle\":";
+  supported_chunks[chunk_count++] = current;
+  for (uint8_t i = 0; i < chunk_count; ++i) {
+    String payload = "{\"type\":\"capability\",\"supported_metrics\":[";
+    payload += supported_chunks[i];
+    payload += "],\"missing_metrics\":[";
+    if (i + 1 == chunk_count) {
+      payload += missing;
+    }
+    payload += "],\"confirmed_from_vehicle\":";
     payload += confirmed ? "true" : "false";
-    if (part_count > 1) {
+    if (chunk_count > 1) {
       payload += ",\"part\":";
       payload += String(i + 1);
       payload += ",\"parts\":";
-      payload += String(part_count);
+      payload += String(chunk_count);
     }
     payload += ",\"ts\":";
     payload += String(millis());
@@ -454,7 +454,9 @@ void HandleBleCommand(const String& command, const String& raw_payload) {
                        String(millis()) + "}");
 
   if (command == "start_stream") {
-    g_telemetry.SetTelemetryFieldMask(obd::core::ParseTelemetryFieldMask(raw_payload));
+    obd::core::BitSet256 fields;
+    obd::core::ParseTelemetryFields(raw_payload, fields);
+    g_telemetry.SetTelemetryFields(fields);
     g_scheduler.SetStreamingEnabled(true);
     PublishStatusSnapshot();
     return;
@@ -468,6 +470,16 @@ void HandleBleCommand(const String& command, const String& raw_payload) {
 
   if (command == "read_dtc") {
     g_diagnostics.ReadDtc();
+    return;
+  }
+
+  if (command == "read_freeze_frame") {
+    g_diagnostics.ReadFreezeFrame();
+    return;
+  }
+
+  if (command == "vehicle_info") {
+    g_diagnostics.ReadVehicleInfo();
     return;
   }
 
@@ -559,7 +571,7 @@ void setup() {
   Serial.begin(115200);
   delay(300);
 
-  Serial.println("ESP32 OBD firmware skeleton booting...");
+  Serial.println("ESP32 OBD firmware booting...");
   Serial.println(g_safety_guard.IsReadOnlyEnabled()
                      ? "Safety mode: listen-only/read-only enabled"
                      : "Safety mode: write-enabled");
@@ -599,14 +611,14 @@ void loop() {
   g_scheduler.Tick();
   CheckLinkHealth();
   g_connection_manager.Tick();
-  // While streaming, emit a TWAI controller snapshot every 5 s. Helps diagnose
+  // While streaming, emit a TWAI controller snapshot every 15 s. Helps diagnose
   // silent buses (bus_off, all-zero msgs_to_rx, growing tx_error) without
   // requiring the user to send a bus_diag command manually.
   if (g_scheduler.IsStreamingEnabled() && (millis() - g_last_diag_emit_ms) > 15000) {
     PublishBusDiag("auto_15s");
     g_last_diag_emit_ms = millis();
   }
-  // OBD telemetry polls one PID per pass, so keep the pass short there; raw
+  // OBD telemetry sends one request per pass, so keep the pass short there; raw
   // and Smart ED streams keep the original pacing.
   const bool polling_obd = g_scheduler.IsStreamingEnabled() &&
                            g_scheduler.GetStreamMode() == obd::services::StreamMode::kTelemetry &&
