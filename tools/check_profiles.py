@@ -72,22 +72,21 @@ def main(profiles_dir):
     longest = 0
     commands = 0
     collisions = []
-    for name in sorted(os.listdir(profiles_dir)):
-        if not name.endswith(".json.gz"):
-            continue
-        with gzip.open(os.path.join(profiles_dir, name), "rt", encoding="utf-8") as f:
-            bundle = json.load(f)
-        for model in bundle["models"]:
-            seen = {}
-            for cmd in model["commands"]:
-                for sig in cmd["signals"]:
-                    line = ext_add_command(cmd, sig)
-                    longest = max(longest, len(line.encode("utf-8")))
-                    commands += 1
-                    short = firmware_key(sig["k"])
-                    if short in seen and seen[short] != sig["k"]:
-                        collisions.append((model["make"], model["model"], sig["k"], seen[short]))
-                    seen[short] = sig["k"]
+    with open(os.path.join(profiles_dir, "index.json"), encoding="utf-8") as f:
+        index = json.load(f)
+    for entry in index:
+        with gzip.open(os.path.join(profiles_dir, entry["file"]), "rt", encoding="utf-8") as f:
+            model = json.load(f)
+        seen = {}
+        for cmd in model["commands"]:
+            for sig in cmd["signals"]:
+                line = ext_add_command(cmd, sig)
+                longest = max(longest, len(line.encode("utf-8")))
+                commands += 1
+                short = firmware_key(sig["k"])
+                if short in seen and seen[short] != sig["k"]:
+                    collisions.append((model["make"], model["model"], sig["k"], seen[short]))
+                seen[short] = sig["k"]
 
     rng = random.Random(1)
     mismatches = 0

@@ -5,7 +5,7 @@ Proizvođački dijagnostički signali (UDS servis 22, KWP servis 21) za 60 marki
 `tools/obdb_to_profiles.py`.
 
 - `index.json` – popis svih modela: marka, model, datoteka, broj upita i signala.
-- `<Marka>.json.gz` – gzip JSON `{"make": ..., "models": [profil, ...]}`.
+- `<Marka>/<Model>.json.gz` – gzip JSON s profilom jednog modela.
 
 Format profila i značenje polja opisani su na vrhu `tools/obdb_to_profiles.py`,
 a naredba `ext_add` kojom aplikacija šalje signal uređaju u glavnom README-u.

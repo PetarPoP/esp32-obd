@@ -1,0 +1,38 @@
+{
+  "expo": {
+    "name": "OBD BLE Monitor",
+    "slug": "obd-ble-monitor",
+    "version": "2.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "android": {
+      "package": "com.petar.obdblemonitor",
+      "permissions": [
+        "android.permission.BLUETOOTH_SCAN",
+        "android.permission.BLUETOOTH_CONNECT",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.INTERNET"
+      ]
+    },
+    "ios": {
+      "bundleIdentifier": "com.petar.obdblemonitor"
+    },
+    "plugins": [
+      [
+        "react-native-ble-plx",
+        {
+          "isBackgroundEnabled": false,
+          "bluetoothAlwaysPermission": "The app connects to the OBD-ESP32 adapter over Bluetooth."
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "835c4fc2-2be4-49de-abe6-dbbcfd18068b"
+      }
+    }
+  }
+}

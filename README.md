@@ -3,6 +3,16 @@
 Firmware za ESP32 s MrDIY OBD/CAN shieldom koji čita podatke iz auta preko OBD-II
 porta i šalje ih mobilnoj aplikaciji preko Bluetooth Low Energy (BLE).
 
+## Repozitorij
+
+| Mapa | Sadržaj |
+| --- | --- |
+| [`esp32-obd/`](esp32-obd/) | firmware (Arduino, ESP32) |
+| [`mobile/`](mobile/) | mobilna aplikacija (Expo / React Native), vidi [mobile/README.md](mobile/README.md) |
+| [`profiles/`](profiles/) | proizvođački PID-ovi za 60 marki / 608 modela (OBDb, CC BY-SA 4.0) |
+| [`tools/`](tools/) | generiranje profila i kataloga metrika, provjere |
+| [`docs/`](docs/) | protokol, plan seminara, generator PDF-a seminara |
+
 ## Hardver i podržana vozila
 
 - ESP32 + MrDIY ESP32 OBD shield (CAN transceiver na OBD pinovima 6 i 14).
@@ -128,8 +138,9 @@ servis 22 ili KWP servis 21) prema pojedinom ECU-u.
 U mapi [`profiles/`](profiles/) su profili za **60 marki i 608 modela**
 (224 710 signala) iz zajedničke baze [OBDb](https://github.com/OBDb)
 (CC BY-SA 4.0): `profiles/index.json` popisuje sve modele, a
-`profiles/<Marka>.json.gz` sadrži sve modele te marke (gzip JSON, format je
-opisan u `tools/obdb_to_profiles.py`).
+`profiles/<Marka>/<Model>.json.gz` je profil jednog modela (gzip JSON, format
+je opisan u `tools/obdb_to_profiles.py`). Mobilna aplikacija ih preuzima
+odavde i nudi odabir marke, modela i signala.
 
 Aplikacija korisniku ponudi marku i model, zatim svaki odabrani signal pošalje
 naredbom `ext_add` (najviše 96 signala, pamte se u flashu i nakon gašenja):
@@ -180,7 +191,7 @@ firmware ostaje aktivno.
   kapacitet (BMS i po ćelijama, Ah), SOH procjena, izolacija, ciklusi HV
   sklopnika, pumpa i ventilator hlađenja, grijač baterije, vakuum pumpa, te
   OBL ili NLG6 punjač (AC naponi i struje po fazi, DC napon i struja,
-  temperature, struja kabela i punionice). Ukupno 95 vrijednosti.
+  temperature, struja kabela i punionice). Ukupno 96 vrijednosti.
 
 ## Struktura koda (`esp32-obd/`)
 

@@ -10,7 +10,8 @@ Usage:
     python tools/obdb_to_profiles.py <dir with Make-Model.json files> profiles/
 
 Output: profiles/index.json (every make and model) and one gzip-compressed
-bundle per make, profiles/<Make>.json.gz = {"make": "Hyundai", "models": [profile, ...]}.
+profile per model, profiles/<Make>/<Model>.json.gz. A copy of the index is
+written to mobile/src/data/profile-index.json for the app.
 
 Profile format:
 {
@@ -40,6 +41,7 @@ import math
 import os
 import sys
 
+NL = chr(10)
 MULTI_WORD_MAKES = ["Mercedes-Benz", "Land-Rover", "Alfa-Romeo", "Rolls-Royce", "Aston-Martin"]
 # OBDb spells a few makes in more than one way.
 CANONICAL_MAKES = {"fiat": "Fiat", "seat": "SEAT", "smart": "smart"}
@@ -143,9 +145,12 @@ def convert_command(cmd):
     return out
 
 
+def slug(text):
+    return "".join(c if c.isalnum() or c in "-_." else "-" for c in text).strip("-") or "default"
+
+
 def main(src_dir, out_dir):
     index = []
-    bundles = {}
     for name in sorted(os.listdir(src_dir)):
         if not name.endswith(".json"):
             continue
@@ -165,24 +170,27 @@ def main(src_dir, out_dir):
             "license": "CC BY-SA 4.0",
             "commands": commands,
         }
-        bundles.setdefault(make, []).append(profile)
+        rel = f"{slug(make)}/{slug(model or make)}.json.gz"
+        os.makedirs(os.path.join(out_dir, slug(make)), exist_ok=True)
+        payload = json.dumps(profile, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+        # mtime=0 keeps the output byte-identical between runs.
+        with open(os.path.join(out_dir, rel), "wb") as f:
+            f.write(gzip.compress(payload, compresslevel=9, mtime=0))
         index.append({
             "make": profile["make"],
             "model": profile["model"],
-            "file": f"{make}.json.gz",
+            "file": rel,
             "commands": len(commands),
             "signals": sum(len(c["signals"]) for c in commands),
         })
-    os.makedirs(out_dir, exist_ok=True)
-    for make, models in bundles.items():
-        payload = json.dumps({"make": make.replace("-", " "), "models": models},
-                             ensure_ascii=False, separators=(",", ":")).encode("utf-8")
-        # mtime=0 keeps the output byte-identical between runs.
-        with open(os.path.join(out_dir, f"{make}.json.gz"), "wb") as f:
-            f.write(gzip.compress(payload, compresslevel=9, mtime=0))
-    with open(os.path.join(out_dir, "index.json"), "w", encoding="utf-8", newline="\n") as f:
+    with open(os.path.join(out_dir, "index.json"), "w", encoding="utf-8", newline=NL) as f:
         json.dump(index, f, ensure_ascii=False, indent=1)
-    print(f"{len(bundles)} makes, {len(index)} models, {sum(i['signals'] for i in index)} signals")
+    app_data = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "mobile", "src", "data")
+    if os.path.isdir(app_data):
+        with open(os.path.join(app_data, "profile-index.json"), "w", encoding="utf-8", newline=NL) as f:
+            json.dump(index, f, ensure_ascii=False, separators=(",", ":"))
+    makes = len({i["make"] for i in index})
+    print(f"{makes} makes, {len(index)} models, {sum(i['signals'] for i in index)} signals")
 
 
 if __name__ == "__main__":
