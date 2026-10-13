@@ -15,6 +15,10 @@
 #include "raw_frame_stream_service.h"
 #include "smart_bms_service.h"
 #include "telemetry_service.h"
+#include "ext_pid_service.h"
+#include "json_lite.h"
+#include "ota_service.h"
+#include "power_manager.h"
 
 namespace {
 
@@ -31,7 +35,17 @@ int FindJsonValueStartLocal(const String& payload, const char* key) {
   return cursor;
 }
 
+String UnquotedKey(const char* key) {
+  String k(key);
+  k.replace("\"", "");
+  return k;
+}
+
 uint32_t ParseUintFieldLocal(const String& payload, const char* key, uint32_t fallback) {
+  const obd::util::JsonObject json(payload);
+  if (json.IsValid()) {
+    return static_cast<uint32_t>(json.GetNumber(UnquotedKey(key).c_str(), fallback));
+  }
   const int start = FindJsonValueStartLocal(payload, key);
   if (start < 0) return fallback;
   int end = start;
@@ -41,6 +55,10 @@ uint32_t ParseUintFieldLocal(const String& payload, const char* key, uint32_t fa
 }
 
 String ParseStringFieldLocal(const String& payload, const char* key) {
+  const obd::util::JsonObject json(payload);
+  if (json.IsValid()) {
+    return json.GetString(UnquotedKey(key).c_str());
+  }
   const int start = FindJsonValueStartLocal(payload, key);
   if (start < 0) return String();
   if (payload.charAt(start) != '"') return String();
@@ -63,14 +81,20 @@ obd::services::DiagnosticsService g_diagnostics(g_transport, g_dtc_decoder, g_pi
                                                 g_safety_guard);
 obd::services::ConnectionManager g_connection_manager;
 obd::services::ObdSchedulerService g_scheduler(g_transport, g_telemetry, g_raw_frames, g_smart_bms);
+obd::services::ExtPidService g_ext_pids(g_transport, g_ble);
+obd::services::OtaService g_ota(g_ble);
+obd::services::PowerManager g_power(g_twai, g_ble);
+
+constexpr char kFirmwareVersion[] = "2.0.0";
 
 // BLE writes arrive on the Bluetooth task. Commands are queued and executed
 // from loop() so long operations (protocol detection, DTC reads, bus scans)
 // never block the BLE stack or race with the scheduler over the CAN driver.
 struct PendingCommand {
   char command[24];
-  char payload[240];
+  char payload[400];
 };
+constexpr uint8_t kCommandQueueLength = 16;
 QueueHandle_t g_command_queue = nullptr;
 
 // True when the protocol came from auto-detection, so a lost link may be
@@ -83,6 +107,9 @@ constexpr uint32_t kLinkRecoveryIntervalMs = 15000;
 // Forward declarations for helpers used across the file (Arduino IDE auto-prototype
 // generation does not see definitions inside an unnamed namespace).
 void PublishStatusSnapshot();
+void PublishDeviceInfo();
+void PublishKeyList(const char* type, const char* const* keys, size_t count, const String& missing,
+                    bool confirmed);
 void PublishProtocol(bool ok, const char* reason);
 void RunProtocolDetection(const String& protocol_text);
 void OnDetectProgress(const char* stage, obd::core::ObdProtocol candidate);
@@ -112,6 +139,25 @@ void PublishStatusSnapshot() {
   payload += "\",\"protocol\":\"";
   payload += g_transport.ProtocolIdString();
   payload += "\",\"ts\":";
+  payload += String(millis());
+  payload += "}";
+  g_ble.NotifyResponse(payload);
+}
+
+void PublishDeviceInfo() {
+  String payload = "{\"type\":\"device\",\"fw\":\"";
+  payload += kFirmwareVersion;
+  payload += "\",\"wake\":\"";
+  payload += g_power.WakeReason();
+  payload += "\",\"sleep_after_s\":";
+  payload += String(g_power.SleepAfterSeconds());
+  payload += ",\"mtu\":";
+  payload += String(g_ble.Mtu());
+  payload += ",\"ext_pids\":";
+  payload += String(g_ext_pids.Count());
+  payload += ",\"ext_pids_max\":";
+  payload += String(obd::services::ExtPidService::kMaxSignals);
+  payload += ",\"ts\":";
   payload += String(millis());
   payload += "}";
   g_ble.NotifyResponse(payload);
@@ -384,12 +430,12 @@ void HandleSetLink(const String& raw_payload) {
 
 void PublishCapabilitiesSnapshot() {
   if (g_transport.GetDiagnosticProfile() == obd::core::DiagnosticProfile::kSmartEd) {
-    g_ble.NotifyResponse("{\"type\":\"capability\",\"supported_metrics\":["
-                         "\"soc_pct\",\"soc_internal_pct\",\"hv_v\",\"hv_amps\","
-                         "\"lv_v\",\"odo_km\",\"time_hh\",\"time_mm\""
-                         "],\"missing_metrics\":[],"
-                         "\"confirmed_from_vehicle\":false,\"ts\":" +
-                         String(millis()) + "}");
+    static const char* keys[obd::services::SmartBmsService::kMaxMetricKeys];
+    const size_t count = obd::services::SmartBmsService::MetricCount();
+    for (size_t i = 0; i < count; ++i) {
+      keys[i] = obd::services::SmartBmsService::MetricKey(i);
+    }
+    PublishKeyList("capability", keys, count, String(), false);
     return;
   }
   // Reports the metrics the vehicle supports (from the PID 00/20/40/...
@@ -428,6 +474,47 @@ void PublishCapabilitiesSnapshot() {
   for (uint8_t i = 0; i < chunk_count; ++i) {
     String payload = "{\"type\":\"capability\",\"supported_metrics\":[";
     payload += supported_chunks[i];
+    payload += "],\"missing_metrics\":[";
+    if (i + 1 == chunk_count) {
+      payload += missing;
+    }
+    payload += "],\"confirmed_from_vehicle\":";
+    payload += confirmed ? "true" : "false";
+    if (chunk_count > 1) {
+      payload += ",\"part\":";
+      payload += String(i + 1);
+      payload += ",\"parts\":";
+      payload += String(chunk_count);
+    }
+    payload += ",\"ts\":";
+    payload += String(millis());
+    payload += "}";
+    g_ble.NotifyResponse(payload);
+  }
+}
+
+// Publishes a list of metric keys as one or more "<type>" messages with
+// supported_metrics / missing_metrics, split to fit the BLE MTU.
+void PublishKeyList(const char* type, const char* const* keys, size_t count, const String& missing,
+                    bool confirmed) {
+  String chunks[24];
+  uint8_t chunk_count = 0;
+  String current;
+  for (size_t i = 0; i < count; ++i) {
+    if (current.length() + strlen(keys[i]) > 150 && chunk_count < 23) {
+      chunks[chunk_count++] = current;
+      current = "";
+    }
+    current += (current.length() > 0 ? ",\"" : "\"");
+    current += keys[i];
+    current += "\"";
+  }
+  chunks[chunk_count++] = current;
+  for (uint8_t i = 0; i < chunk_count; ++i) {
+    String payload = "{\"type\":\"";
+    payload += type;
+    payload += "\",\"supported_metrics\":[";
+    payload += chunks[i];
     payload += "],\"missing_metrics\":[";
     if (i + 1 == chunk_count) {
       payload += missing;
@@ -511,7 +598,83 @@ void HandleBleCommand(const String& command, const String& raw_payload) {
     HandleBusScan();
     return;
   }
+
+  const obd::util::JsonObject json(raw_payload);
+
+  if (command == "clear_dtc") {
+    g_diagnostics.ClearDtc(json.GetString("confirm"));
+    return;
+  }
+
+  if (command == "read_readiness") {
+    g_diagnostics.ReadReadiness();
+    return;
+  }
+
+  if (command == "read_monitor_tests") {
+    const bool was_streaming = g_scheduler.IsStreamingEnabled();
+    g_scheduler.SetStreamingEnabled(false);
+    g_diagnostics.ReadMonitorTests();
+    g_scheduler.SetStreamingEnabled(was_streaming);
+    return;
+  }
+
+  if (command == "ext_add") {
+    String error;
+    const bool ok = g_ext_pids.Add(json, error);
+    String payload = "{\"type\":\"ext_add\",\"ok\":";
+    payload += ok ? "true" : "false";
+    payload += ",\"key\":\"";
+    payload += json.GetString("k");
+    payload += "\",\"count\":";
+    payload += String(g_ext_pids.Count());
+    if (!ok) {
+      payload += ",\"reason\":\"";
+      payload += error;
+      payload += "\"";
+    }
+    payload += "}";
+    g_ble.NotifyResponse(payload);
+    return;
+  }
+
+  if (command == "ext_clear") {
+    g_ext_pids.Clear();
+    g_ext_pids.PublishList();
+    return;
+  }
+
+  if (command == "ext_list") {
+    g_ext_pids.PublishList();
+    return;
+  }
+
+  if (command == "ota_begin") {
+    g_scheduler.SetStreamingEnabled(false);
+    g_ota.Begin(static_cast<size_t>(json.GetNumber("size", 0)), json.GetString("md5"));
+    return;
+  }
+
+  if (command == "ota_end") {
+    g_ota.End();
+    return;
+  }
+
+  if (command == "ota_abort") {
+    g_ota.Abort("app_request");
+    return;
+  }
+
+  if (command == "set_power") {
+    if (json.Has("sleep_after_s")) {
+      g_power.SetSleepAfterSeconds(static_cast<uint32_t>(json.GetNumber("sleep_after_s", 0)));
+    }
+    PublishDeviceInfo();
+    return;
+  }
 }
+
+void OnOtaData(const uint8_t* data, size_t len) { g_ota.OnData(data, len); }
 
 void EnqueueBleCommand(const String& command, const String& raw_payload) {
   PendingCommand item = {};
@@ -595,10 +758,15 @@ void setup() {
   if (!g_ble.Begin()) {
     Serial.println("BLE init failed");
   }
-  g_command_queue = xQueueCreate(4, sizeof(PendingCommand));
+  g_command_queue = xQueueCreate(kCommandQueueLength, sizeof(PendingCommand));
   g_ble.SetCommandHandler(EnqueueBleCommand);
+  g_ble.SetOtaDataHandler(OnOtaData);
+  g_power.Begin();
+  g_ext_pids.Begin();
+  g_telemetry.SetExtPidService(&g_ext_pids);
 
   g_scheduler.SetStreamingEnabled(false);
+  PublishDeviceInfo();
   PublishStatusSnapshot();
   PublishCapabilitiesSnapshot();
 }
@@ -607,6 +775,16 @@ unsigned long g_last_diag_emit_ms = 0;
 
 void loop() {
   DrainCommandQueue();
+  g_ota.Tick();
+  g_ext_pids.Tick();
+  if (!g_scheduler.IsStreamingEnabled()) {
+    // Nobody consumes CAN frames while idle: drain them so bus activity is
+    // still noticed by the power manager and the RX queue never stalls.
+    obd::drivers::CanFrame frame;
+    for (uint8_t i = 0; i < 64 && g_twai.ReadFrame(frame, 0); ++i) {
+    }
+  }
+  g_power.Tick(g_ota.IsActive());
   g_transport.Tick();
   g_scheduler.Tick();
   CheckLinkHealth();
@@ -620,8 +798,9 @@ void loop() {
   }
   // OBD telemetry sends one request per pass, so keep the pass short there; raw
   // and Smart ED streams keep the original pacing.
-  const bool polling_obd = g_scheduler.IsStreamingEnabled() &&
-                           g_scheduler.GetStreamMode() == obd::services::StreamMode::kTelemetry &&
-                           g_transport.GetDiagnosticProfile() == obd::core::DiagnosticProfile::kObdMode01;
-  delay(polling_obd ? 10 : 100);
+  // Smart ED decodes a busy bus, so it also needs short passes to keep the
+  // TWAI RX queue from overflowing during multi-frame BMS answers.
+  const bool busy_stream = g_scheduler.IsStreamingEnabled() &&
+                           g_scheduler.GetStreamMode() == obd::services::StreamMode::kTelemetry;
+  delay(busy_stream || g_ota.IsActive() ? 10 : 100);
 }

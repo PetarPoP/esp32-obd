@@ -46,6 +46,9 @@ class TwaiDriver {
   // Bus error counter since the driver was installed (0 if not installed).
   uint32_t BusErrorCount();
 
+  // millis() of the last received frame (0 if none since boot).
+  uint32_t LastRxMs() const;
+
   bool IsInstalled() const;
   bool IsListenOnly() const;
   uint32_t BaudKbps() const;
@@ -56,6 +59,7 @@ class TwaiDriver {
 
  private:
   bool installed_ = false;
+  uint32_t last_rx_ms_ = 0;
   bool listen_only_ = false;
   uint32_t baud_kbps_ = 500;
 };

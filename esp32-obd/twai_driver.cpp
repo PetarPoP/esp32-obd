@@ -44,7 +44,7 @@ bool InstallAndStart(twai_mode_t mode, uint32_t baud_kbps) {
       config::kTwaiTxPin, config::kTwaiRxPin, mode);
   // Larger queues smooth out bursty traffic during PID polling and raw sniffing.
   g.tx_queue_len = 8;
-  g.rx_queue_len = 64;
+  g.rx_queue_len = 128;
   twai_timing_config_t t = MakeTiming(baud_kbps);
   twai_filter_config_t f = TWAI_FILTER_CONFIG_ACCEPT_ALL();
 
@@ -105,6 +105,7 @@ bool TwaiDriver::ReadFrame(CanFrame& out_frame, uint32_t timeout_ms) {
   }
   out_frame.timestamp_ms = millis();
   out_frame.extended = (msg.flags & TWAI_MSG_FLAG_EXTD) != 0;
+  last_rx_ms_ = out_frame.timestamp_ms;
   return true;
 }
 
@@ -155,6 +156,8 @@ uint32_t TwaiDriver::BusErrorCount() {
   }
   return info.bus_error_count;
 }
+
+uint32_t TwaiDriver::LastRxMs() const { return last_rx_ms_; }
 
 bool TwaiDriver::IsInstalled() const { return installed_; }
 bool TwaiDriver::IsListenOnly() const { return listen_only_; }

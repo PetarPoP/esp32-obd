@@ -22,7 +22,19 @@ class DiagnosticsService {
   // Reads stored (Mode 03), pending (Mode 07) and permanent (Mode 0A) DTCs
   // from every ECU and publishes them in one "dtc" message.
   void ReadDtc();
-  void ClearDtc();
+
+  // Mode 04, in two steps: without a token (or with a stale one) it answers
+  // "confirm_required" with a fresh token valid for 30 s; sending that token
+  // back clears the codes. Refused unless the vehicle is stationary and the
+  // engine is off. Clearing also resets the readiness monitors.
+  void ClearDtc(const String& confirm_token);
+
+  // Mode 01 PID 01: MIL, DTC count and which readiness monitors are complete.
+  void ReadReadiness();
+
+  // Mode 06: on-board monitor test results, one "monitor_test" message per
+  // test, then "monitor_tests_done".
+  void ReadMonitorTests();
 
   // Reads freeze frame 0 (Mode 02): the DTC that stored it and the engine
   // values at that moment. Publishes one or more "freeze_frame" messages.
@@ -47,6 +59,9 @@ class DiagnosticsService {
   app_link::TransportBle& app_link_;
   safety::SafetyGuard& safety_guard_;
   size_t code_list_chars_ = 0;
+  uint16_t clear_token_ = 0;
+  uint32_t clear_token_expires_ms_ = 0;
+  static constexpr uint32_t kClearTokenLifetimeMs = 30000;
 };
 
 }  // namespace services

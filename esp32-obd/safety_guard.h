@@ -10,7 +10,10 @@ class SafetyGuard {
 
  private:
   static constexpr bool kReadOnlyDefault = true;
-  static constexpr bool kAllowClearDtcDefault = false;
+  // Clearing DTCs is allowed only through DiagnosticsService::ClearDtc, which
+  // requires an app confirmation token, a stationary vehicle and the engine
+  // off. Set to false to lock it completely.
+  static constexpr bool kAllowClearDtcDefault = true;
 };
 
 }  // namespace safety

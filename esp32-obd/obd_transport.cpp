@@ -264,6 +264,13 @@ bool ObdTransport::AcceptResponse(const uint8_t* request, uint8_t request_len,
   // Modes 01, 02 and 09 echo the PID; make sure the answer is for one of ours.
   // A multi-PID Mode 01 request may be answered in any order or partially.
   const uint8_t mode = request[0];
+  // Services 21 (1-byte local identifier) and 22 (2-byte DID) echo the identifier.
+  if (mode == 0x22 && request_len >= 3) {
+    return len >= 3 && data[1] == request[1] && data[2] == request[2];
+  }
+  if (mode == 0x21 && request_len >= 2) {
+    return len >= 2 && data[1] == request[1];
+  }
   if ((mode == 0x01 || mode == 0x02 || mode == 0x09) && request_len >= 2) {
     if (len < 2) {
       return false;
@@ -291,16 +298,41 @@ void ObdTransport::StoreMessage(uint8_t ecu, const uint8_t* data, uint8_t len) {
 
 uint8_t ObdTransport::Request(const uint8_t* request, uint8_t request_len, bool wait_for_all,
                               uint32_t timeout_ms, CompletionCallback done, void* done_context) {
+  Addressing addressing;
+  addressing.extended = IsExtendedCan(protocol_);
+  addressing.functional = true;
+  addressing.tx = addressing.extended ? kCan29FunctionalId : kCan11FunctionalId;
+  return RequestImpl(addressing, request, request_len, wait_for_all, timeout_ms, done, done_context);
+}
+
+uint8_t ObdTransport::RequestPhysical(const PhysicalAddress& address, const uint8_t* request,
+                                      uint8_t request_len, uint32_t timeout_ms) {
+  Addressing addressing;
+  addressing.extended = address.extended;
+  addressing.functional = false;
+  addressing.tx = address.tx;
+  addressing.rx = address.rx;
+  addressing.ext_addr = address.ext_addr;
+  addressing.tester = address.tester;
+  return RequestImpl(addressing, request, request_len, /*wait_for_all=*/false, timeout_ms, nullptr,
+                     nullptr);
+}
+
+uint8_t ObdTransport::RequestImpl(const Addressing& addressing, const uint8_t* request,
+                                  uint8_t request_len, bool wait_for_all, uint32_t timeout_ms,
+                                  CompletionCallback done, void* done_context) {
   message_count_ = 0;
   last_nrc_ = 0;
-  if (request == nullptr || request_len == 0 || request_len > 7 ||
+  // With an extended address byte in front, a single frame carries 6 bytes.
+  const uint8_t o = addressing.ext_addr >= 0 ? 1 : 0;
+  if (request == nullptr || request_len == 0 || request_len > 7 - o ||
       protocol_ == ObdProtocol::kNone || diagnostic_profile_ != DiagnosticProfile::kObdMode01) {
-    return 0;  // multi-frame requests are never needed for OBD-II services
+    return 0;  // multi-frame requests are never needed for diagnostic reads
   }
   if (timeout_ms == 0) {
     timeout_ms = kCanDefaultTimeoutMs;
   }
-  const bool extended = IsExtendedCan(protocol_);
+  const bool extended = addressing.extended;
 
   // Drop frames left over from earlier traffic so they cannot be mistaken for answers.
   drivers::CanFrame frame;
@@ -309,11 +341,15 @@ uint8_t ObdTransport::Request(const uint8_t* request, uint8_t request_len, bool 
 
   uint8_t sf[8];
   memset(sf, kCanPadding, sizeof(sf));
-  sf[0] = request_len;
-  memcpy(&sf[1], request, request_len);
-  if (!twai_driver_.SendFrame(extended ? kCan29FunctionalId : kCan11FunctionalId, sf, sizeof(sf),
-                              50, extended, probing_)) {
-    ++consecutive_failures_;
+  if (o) {
+    sf[0] = static_cast<uint8_t>(addressing.ext_addr);
+  }
+  sf[o] = request_len;
+  memcpy(&sf[o + 1], request, request_len);
+  if (!twai_driver_.SendFrame(addressing.tx, sf, sizeof(sf), 50, extended, probing_)) {
+    if (addressing.functional && consecutive_failures_ < 0xFFFF) {
+      ++consecutive_failures_;
+    }
     return 0;
   }
 
@@ -342,12 +378,21 @@ uint8_t ObdTransport::Request(const uint8_t* request, uint8_t request_len, bool 
     if (!twai_driver_.ReadFrame(frame, 5)) {
       continue;
     }
-    if (frame.extended != extended || frame.dlc < 2) {
+    if (frame.extended != extended || frame.dlc < 2 + o) {
       continue;
     }
     uint8_t ecu = 0;
     uint32_t flow_control_id = 0;
-    if (extended) {
+    if (!addressing.functional) {
+      if (frame.id != addressing.rx) {
+        continue;
+      }
+      if (o && frame.data[0] != addressing.tester) {
+        continue;
+      }
+      ecu = frame.id & 0xFF;
+      flow_control_id = addressing.tx;
+    } else if (extended) {
       if ((frame.id & 0xFFFFFF00u) != kCan29ResponseBase) {
         continue;
       }
@@ -361,18 +406,20 @@ uint8_t ObdTransport::Request(const uint8_t* request, uint8_t request_len, bool 
       flow_control_id = frame.id - kCan11PhysicalOffset;
     }
 
-    const uint8_t pci_type = frame.data[0] >> 4;
+    const uint8_t* d = &frame.data[o];
+    const uint8_t dlc = frame.dlc - o;
+    const uint8_t pci_type = d[0] >> 4;
     if (pci_type == kPciSingle) {
-      const uint8_t len = frame.data[0] & 0x0F;
-      if (len == 0 || len > frame.dlc - 1) {
+      const uint8_t len = d[0] & 0x0F;
+      if (len == 0 || len > dlc - 1) {
         continue;
       }
-      if (AcceptResponse(request, request_len, &frame.data[1], len, deadline)) {
-        StoreMessage(ecu, &frame.data[1], len);
+      if (AcceptResponse(request, request_len, &d[1], len, deadline)) {
+        StoreMessage(ecu, &d[1], len);
         complete = finished();
       }
     } else if (pci_type == kPciFirst) {
-      if (frame.dlc < 8) {
+      if (dlc < 3) {
         continue;
       }
       RxSlot* slot = nullptr;
@@ -391,22 +438,25 @@ uint8_t ObdTransport::Request(const uint8_t* request, uint8_t request_len, bool 
         continue;
       }
       slot->id = frame.id;
-      slot->expected = (static_cast<uint16_t>(frame.data[0] & 0x0F) << 8) | frame.data[1];
+      slot->expected = (static_cast<uint16_t>(d[0] & 0x0F) << 8) | d[1];
       slot->received = 0;
       slot->next_sn = 1;
       slot->active = true;
-      for (uint8_t i = 2; i < 8; ++i) {
+      for (uint8_t i = 2; i < dlc; ++i) {
         if (slot->received < kObdMessageMaxLen) {
-          slot->buf[slot->received] = frame.data[i];
+          slot->buf[slot->received] = d[i];
         }
         ++slot->received;
       }
       // Flow control: continue to send, no block limit, no separation time.
       uint8_t fc[8];
       memset(fc, kCanPadding, sizeof(fc));
-      fc[0] = 0x30;
-      fc[1] = 0x00;
-      fc[2] = 0x00;
+      if (o) {
+        fc[0] = static_cast<uint8_t>(addressing.ext_addr);
+      }
+      fc[o] = 0x30;
+      fc[o + 1] = 0x00;
+      fc[o + 2] = 0x00;
       twai_driver_.SendFrame(flow_control_id, fc, sizeof(fc), 50, extended, false);
       const uint32_t extended_deadline = millis() + kCanMultiFrameTimeoutMs;
       if (!IsTimeBefore(extended_deadline, deadline)) {
@@ -417,14 +467,14 @@ uint8_t ObdTransport::Request(const uint8_t* request, uint8_t request_len, bool 
         if (!slot.active || slot.id != frame.id) {
           continue;
         }
-        if ((frame.data[0] & 0x0F) != slot.next_sn) {
+        if ((d[0] & 0x0F) != slot.next_sn) {
           slot.active = false;  // lost a frame; drop this ECU's answer
           break;
         }
         slot.next_sn = (slot.next_sn + 1) & 0x0F;
-        for (uint8_t i = 1; i < frame.dlc && slot.received < slot.expected; ++i) {
+        for (uint8_t i = 1; i < dlc && slot.received < slot.expected; ++i) {
           if (slot.received < kObdMessageMaxLen) {
-            slot.buf[slot.received] = frame.data[i];
+            slot.buf[slot.received] = d[i];
           }
           ++slot.received;
         }
@@ -447,12 +497,16 @@ uint8_t ObdTransport::Request(const uint8_t* request, uint8_t request_len, bool 
     }
   }
 
-  if (message_count_ == 0) {
-    if (consecutive_failures_ < 0xFFFF) {
-      ++consecutive_failures_;
+  // Only standard OBD requests feed link health; an unsupported
+  // manufacturer DID must not look like a lost vehicle.
+  if (addressing.functional) {
+    if (message_count_ == 0) {
+      if (consecutive_failures_ < 0xFFFF) {
+        ++consecutive_failures_;
+      }
+    } else {
+      consecutive_failures_ = 0;
     }
-  } else {
-    consecutive_failures_ = 0;
   }
   return message_count_;
 }

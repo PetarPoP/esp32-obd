@@ -43,8 +43,15 @@ void TelemetryService::SetTelemetryFields(const core::BitSet256& fields) {
   Reset();
 }
 
+void TelemetryService::SetExtPidService(ExtPidService* ext_pids) { ext_pids_ = ext_pids; }
+
+void TelemetryService::AppendExtField(void* context, const char* key, const String& value) {
+  static_cast<TelemetryService*>(context)->AppendField(key, value);
+}
+
 void TelemetryService::Reset() {
   next_pid_ = 1;
+  ext_rotation_done_ = false;
   accumulated_json_ = "";
   any_field_obtained_ = false;
   batching_enabled_ = true;
@@ -144,6 +151,14 @@ void TelemetryService::Tick() {
   }
 
   if (count == 0) {
+    // Standard PIDs done: one manufacturer request per pass, then publish.
+    if (ext_pids_ != nullptr && ext_pids_->Count() > 0 && !ext_rotation_done_) {
+      ext_rotation_done_ = ext_pids_->PollNext(AppendExtField, this);
+      if (!ext_rotation_done_) {
+        return;
+      }
+    }
+    ext_rotation_done_ = false;
     PublishRotation();
     return;
   }

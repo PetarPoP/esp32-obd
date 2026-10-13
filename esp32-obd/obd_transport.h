@@ -49,6 +49,15 @@ struct ObdMessage {
   uint8_t data[kObdMessageMaxLen] = {0};
 };
 
+// Physical (one ECU) addressing for manufacturer-specific requests.
+struct PhysicalAddress {
+  uint32_t tx = 0;
+  uint32_t rx = 0;
+  bool extended = false;   // 29-bit identifiers
+  int16_t ext_addr = -1;   // ISO-TP extended address byte (BMW), -1 = none
+  uint8_t tester = 0xF1;   // first byte of answers when ext_addr is used
+};
+
 class ObdTransport {
  public:
   using ProgressCallback = void (*)(const char* stage, ObdProtocol candidate);
@@ -93,6 +102,11 @@ class ObdTransport {
   uint8_t Request(const uint8_t* request, uint8_t request_len, bool wait_for_all,
                   uint32_t timeout_ms = 0, CompletionCallback done = nullptr,
                   void* done_context = nullptr);
+  // Sends a request to one ECU (Mode 21/22 manufacturer PIDs, session
+  // control) and returns on its first positive answer. Does not affect
+  // ConsecutiveFailures().
+  uint8_t RequestPhysical(const PhysicalAddress& address, const uint8_t* request,
+                          uint8_t request_len, uint32_t timeout_ms = 0);
   uint8_t MessageCount() const;
   const ObdMessage& Message(uint8_t index) const;
   // Last negative response code (0x7F xx NRC) seen, or 0.
@@ -121,6 +135,18 @@ class ObdTransport {
   uint16_t ConsecutiveFailures() const;
 
  private:
+  struct Addressing {
+    uint32_t tx = 0;
+    uint32_t rx = 0;
+    bool extended = false;
+    bool functional = true;
+    int16_t ext_addr = -1;
+    uint8_t tester = 0xF1;
+  };
+
+  uint8_t RequestImpl(const Addressing& addressing, const uint8_t* request, uint8_t request_len,
+                      bool wait_for_all, uint32_t timeout_ms, CompletionCallback done,
+                      void* done_context);
   bool AcceptResponse(const uint8_t* request, uint8_t request_len, const uint8_t* data,
                       uint8_t len, uint32_t& deadline);
   void StoreMessage(uint8_t ecu, const uint8_t* data, uint8_t len);

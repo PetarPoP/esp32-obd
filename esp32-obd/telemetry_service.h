@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ext_pid_service.h"
 #include "transport_ble.h"
 #include "obd_transport.h"
 #include "pid_decoder.h"
@@ -26,6 +27,9 @@ class TelemetryService {
   // Drops accumulated state so the next rotation starts clean.
   void Reset();
 
+  // Manufacturer PIDs to poll after the standard ones in every rotation.
+  void SetExtPidService(ExtPidService* ext_pids);
+
  private:
   struct BatchContext {
     const uint8_t* pids;
@@ -33,6 +37,7 @@ class TelemetryService {
   };
 
   static bool BatchComplete(const core::ObdTransport& transport, void* context);
+  static void AppendExtField(void* context, const char* key, const String& value);
   void DecodePid(uint8_t pid, const uint8_t* data, uint8_t len);
   void AppendField(const char* key, const String& value);
   void PublishRotation();
@@ -48,6 +53,8 @@ class TelemetryService {
   String accumulated_json_;
   bool any_field_obtained_ = false;
   uint32_t last_degraded_ms_ = 0;
+  ExtPidService* ext_pids_ = nullptr;
+  bool ext_rotation_done_ = false;
 
   // ISO 15765-4 allows up to six PIDs in one Mode 01 request.
   static constexpr uint8_t kMaxPidsPerRequest = 6;
