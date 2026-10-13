@@ -6,7 +6,9 @@ namespace services {
 namespace {
 constexpr uint8_t kMaxRawFramesPerTick = 8;
 constexpr uint8_t kMaxPiggybackFramesPerTick = 4;
-constexpr uint8_t kMaxSmartFramesPerTick = 16;
+// The Smart ED bus is busy; drain the RX queue completely each pass so UDS
+// answers are not dropped (only the first few go out as raw frames).
+constexpr uint8_t kMaxSmartFramesPerTick = 128;
 }  // namespace
 
 ObdSchedulerService::ObdSchedulerService(core::ObdTransport& transport,
@@ -33,7 +35,7 @@ void ObdSchedulerService::Tick() {
         break;
       }
       smart_bms_service_.OnFrame(frame);
-      if (stream_mode_ == StreamMode::kRawFrames) {
+      if (stream_mode_ == StreamMode::kRawFrames && i < kMaxRawFramesPerTick) {
         raw_frame_stream_.Publish(frame);
       }
     }

@@ -10,6 +10,7 @@ struct CanFrame {
   uint8_t dlc = 0;
   uint8_t data[8] = {0};
   uint32_t timestamp_ms = 0;
+  bool extended = false;  // 29-bit identifier
 };
 
 class TwaiDriver {
@@ -32,8 +33,21 @@ class TwaiDriver {
   // Reads one frame. timeout_ms == 0 returns immediately; >0 blocks up to that long.
   bool ReadFrame(CanFrame& out_frame, uint32_t timeout_ms = 0);
 
-  // Transmits one classic 11-bit CAN frame. Returns false in listen-only mode.
-  bool SendFrame(uint32_t id, const uint8_t* data, uint8_t dlc, uint32_t timeout_ms = 50);
+  // Transmits one classic CAN frame (11-bit, or 29-bit when extended is set).
+  // single_shot disables automatic retransmission, which keeps protocol probing
+  // at a possibly wrong baud from flooding the bus. Returns false in listen-only mode.
+  bool SendFrame(uint32_t id, const uint8_t* data, uint8_t dlc, uint32_t timeout_ms = 50,
+                 bool extended = false, bool single_shot = false);
+
+  // Recovers the controller from bus-off and restarts it. Returns true if the
+  // controller is (again) running.
+  bool RecoverIfBusOff();
+
+  // Bus error counter since the driver was installed (0 if not installed).
+  uint32_t BusErrorCount();
+
+  // millis() of the last received frame (0 if none since boot).
+  uint32_t LastRxMs() const;
 
   bool IsInstalled() const;
   bool IsListenOnly() const;
@@ -45,6 +59,7 @@ class TwaiDriver {
 
  private:
   bool installed_ = false;
+  uint32_t last_rx_ms_ = 0;
   bool listen_only_ = false;
   uint32_t baud_kbps_ = 500;
 };

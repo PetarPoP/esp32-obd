@@ -1,0 +1,4258 @@
+[
+ {
+  "make": "Acura",
+  "model": "CSX",
+  "file": "Acura/CSX.json.gz",
+  "commands": 32,
+  "signals": 175
+ },
+ {
+  "make": "Acura",
+  "model": "ILX",
+  "file": "Acura/ILX.json.gz",
+  "commands": 33,
+  "signals": 267
+ },
+ {
+  "make": "Acura",
+  "model": "Integra",
+  "file": "Acura/Integra.json.gz",
+  "commands": 17,
+  "signals": 42
+ },
+ {
+  "make": "Acura",
+  "model": "MDX",
+  "file": "Acura/MDX.json.gz",
+  "commands": 41,
+  "signals": 110
+ },
+ {
+  "make": "Acura",
+  "model": "RDX",
+  "file": "Acura/RDX.json.gz",
+  "commands": 41,
+  "signals": 113
+ },
+ {
+  "make": "Acura",
+  "model": "TLX",
+  "file": "Acura/TLX.json.gz",
+  "commands": 21,
+  "signals": 45
+ },
+ {
+  "make": "Acura",
+  "model": "TSX",
+  "file": "Acura/TSX.json.gz",
+  "commands": 49,
+  "signals": 115
+ },
+ {
+  "make": "Acura",
+  "model": "ZDX",
+  "file": "Acura/ZDX.json.gz",
+  "commands": 25,
+  "signals": 30
+ },
+ {
+  "make": "Acura",
+  "model": "Acura",
+  "file": "Acura/Acura.json.gz",
+  "commands": 90,
+  "signals": 376
+ },
+ {
+  "make": "Aiways",
+  "model": "U5",
+  "file": "Aiways/U5.json.gz",
+  "commands": 28,
+  "signals": 29
+ },
+ {
+  "make": "Aiways",
+  "model": "Aiways",
+  "file": "Aiways/Aiways.json.gz",
+  "commands": 28,
+  "signals": 29
+ },
+ {
+  "make": "Alfa Romeo",
+  "model": "Alfa Romeo",
+  "file": "Alfa-Romeo/Alfa-Romeo.json.gz",
+  "commands": 28,
+  "signals": 64
+ },
+ {
+  "make": "Audi",
+  "model": "A1",
+  "file": "Audi/A1.json.gz",
+  "commands": 1076,
+  "signals": 1137
+ },
+ {
+  "make": "Audi",
+  "model": "A3",
+  "file": "Audi/A3.json.gz",
+  "commands": 676,
+  "signals": 768
+ },
+ {
+  "make": "Audi",
+  "model": "A4",
+  "file": "Audi/A4.json.gz",
+  "commands": 31,
+  "signals": 31
+ },
+ {
+  "make": "Audi",
+  "model": "A5",
+  "file": "Audi/A5.json.gz",
+  "commands": 639,
+  "signals": 694
+ },
+ {
+  "make": "Audi",
+  "model": "A6",
+  "file": "Audi/A6.json.gz",
+  "commands": 31,
+  "signals": 31
+ },
+ {
+  "make": "Audi",
+  "model": "A7",
+  "file": "Audi/A7.json.gz",
+  "commands": 788,
+  "signals": 822
+ },
+ {
+  "make": "Audi",
+  "model": "Q2",
+  "file": "Audi/Q2.json.gz",
+  "commands": 907,
+  "signals": 976
+ },
+ {
+  "make": "Audi",
+  "model": "Q3",
+  "file": "Audi/Q3.json.gz",
+  "commands": 449,
+  "signals": 479
+ },
+ {
+  "make": "Audi",
+  "model": "Q4 e tron",
+  "file": "Audi/Q4-e-tron.json.gz",
+  "commands": 251,
+  "signals": 290
+ },
+ {
+  "make": "Audi",
+  "model": "Q5",
+  "file": "Audi/Q5.json.gz",
+  "commands": 827,
+  "signals": 887
+ },
+ {
+  "make": "Audi",
+  "model": "Q7",
+  "file": "Audi/Q7.json.gz",
+  "commands": 639,
+  "signals": 684
+ },
+ {
+  "make": "Audi",
+  "model": "Q8 e tron",
+  "file": "Audi/Q8-e-tron.json.gz",
+  "commands": 369,
+  "signals": 899
+ },
+ {
+  "make": "Audi",
+  "model": "Q8",
+  "file": "Audi/Q8.json.gz",
+  "commands": 451,
+  "signals": 499
+ },
+ {
+  "make": "Audi",
+  "model": "RS 3",
+  "file": "Audi/RS-3.json.gz",
+  "commands": 31,
+  "signals": 31
+ },
+ {
+  "make": "Audi",
+  "model": "S3",
+  "file": "Audi/S3.json.gz",
+  "commands": 913,
+  "signals": 985
+ },
+ {
+  "make": "Audi",
+  "model": "S4",
+  "file": "Audi/S4.json.gz",
+  "commands": 1254,
+  "signals": 1366
+ },
+ {
+  "make": "Audi",
+  "model": "S5",
+  "file": "Audi/S5.json.gz",
+  "commands": 1137,
+  "signals": 1245
+ },
+ {
+  "make": "Audi",
+  "model": "S6",
+  "file": "Audi/S6.json.gz",
+  "commands": 858,
+  "signals": 921
+ },
+ {
+  "make": "Audi",
+  "model": "SQ2",
+  "file": "Audi/SQ2.json.gz",
+  "commands": 924,
+  "signals": 993
+ },
+ {
+  "make": "Audi",
+  "model": "SQ5",
+  "file": "Audi/SQ5.json.gz",
+  "commands": 31,
+  "signals": 31
+ },
+ {
+  "make": "Audi",
+  "model": "SQ7",
+  "file": "Audi/SQ7.json.gz",
+  "commands": 60,
+  "signals": 71
+ },
+ {
+  "make": "Audi",
+  "model": "SQ8",
+  "file": "Audi/SQ8.json.gz",
+  "commands": 68,
+  "signals": 80
+ },
+ {
+  "make": "Audi",
+  "model": "TT",
+  "file": "Audi/TT.json.gz",
+  "commands": 847,
+  "signals": 886
+ },
+ {
+  "make": "Audi",
+  "model": "TTS",
+  "file": "Audi/TTS.json.gz",
+  "commands": 831,
+  "signals": 866
+ },
+ {
+  "make": "Audi",
+  "model": "e tron GT",
+  "file": "Audi/e-tron-GT.json.gz",
+  "commands": 252,
+  "signals": 744
+ },
+ {
+  "make": "Audi",
+  "model": "e tron",
+  "file": "Audi/e-tron.json.gz",
+  "commands": 441,
+  "signals": 945
+ },
+ {
+  "make": "Audi",
+  "model": "Audi",
+  "file": "Audi/Audi.json.gz",
+  "commands": 1975,
+  "signals": 3003
+ },
+ {
+  "make": "BMW",
+  "model": "1 Series",
+  "file": "BMW/1-Series.json.gz",
+  "commands": 97,
+  "signals": 174
+ },
+ {
+  "make": "BMW",
+  "model": "2 Series Plug in Hybrid",
+  "file": "BMW/2-Series-Plug-in-Hybrid.json.gz",
+  "commands": 84,
+  "signals": 163
+ },
+ {
+  "make": "BMW",
+  "model": "2 Series",
+  "file": "BMW/2-Series.json.gz",
+  "commands": 101,
+  "signals": 200
+ },
+ {
+  "make": "BMW",
+  "model": "3 Series eDrive",
+  "file": "BMW/3-Series-eDrive.json.gz",
+  "commands": 111,
+  "signals": 220
+ },
+ {
+  "make": "BMW",
+  "model": "3 Series",
+  "file": "BMW/3-Series.json.gz",
+  "commands": 106,
+  "signals": 211
+ },
+ {
+  "make": "BMW",
+  "model": "4 Series",
+  "file": "BMW/4-Series.json.gz",
+  "commands": 37,
+  "signals": 59
+ },
+ {
+  "make": "BMW",
+  "model": "5 Series",
+  "file": "BMW/5-Series.json.gz",
+  "commands": 120,
+  "signals": 269
+ },
+ {
+  "make": "BMW",
+  "model": "6 Series Gran Coupe",
+  "file": "BMW/6-Series-Gran-Coupe.json.gz",
+  "commands": 83,
+  "signals": 162
+ },
+ {
+  "make": "BMW",
+  "model": "6 Series Gran Turismo",
+  "file": "BMW/6-Series-Gran-Turismo.json.gz",
+  "commands": 90,
+  "signals": 181
+ },
+ {
+  "make": "BMW",
+  "model": "6 Series",
+  "file": "BMW/6-Series.json.gz",
+  "commands": 90,
+  "signals": 169
+ },
+ {
+  "make": "BMW",
+  "model": "7 Series",
+  "file": "BMW/7-Series.json.gz",
+  "commands": 114,
+  "signals": 243
+ },
+ {
+  "make": "BMW",
+  "model": "ALPINA XB7",
+  "file": "BMW/ALPINA-XB7.json.gz",
+  "commands": 76,
+  "signals": 140
+ },
+ {
+  "make": "BMW",
+  "model": "M2",
+  "file": "BMW/M2.json.gz",
+  "commands": 101,
+  "signals": 200
+ },
+ {
+  "make": "BMW",
+  "model": "M3 CS",
+  "file": "BMW/M3-CS.json.gz",
+  "commands": 76,
+  "signals": 139
+ },
+ {
+  "make": "BMW",
+  "model": "M3",
+  "file": "BMW/M3.json.gz",
+  "commands": 92,
+  "signals": 168
+ },
+ {
+  "make": "BMW",
+  "model": "M4",
+  "file": "BMW/M4.json.gz",
+  "commands": 92,
+  "signals": 167
+ },
+ {
+  "make": "BMW",
+  "model": "M5",
+  "file": "BMW/M5.json.gz",
+  "commands": 116,
+  "signals": 245
+ },
+ {
+  "make": "BMW",
+  "model": "X1",
+  "file": "BMW/X1.json.gz",
+  "commands": 112,
+  "signals": 252
+ },
+ {
+  "make": "BMW",
+  "model": "X2",
+  "file": "BMW/X2.json.gz",
+  "commands": 115,
+  "signals": 244
+ },
+ {
+  "make": "BMW",
+  "model": "X3",
+  "file": "BMW/X3.json.gz",
+  "commands": 105,
+  "signals": 207
+ },
+ {
+  "make": "BMW",
+  "model": "X4",
+  "file": "BMW/X4.json.gz",
+  "commands": 94,
+  "signals": 171
+ },
+ {
+  "make": "BMW",
+  "model": "X5 M",
+  "file": "BMW/X5-M.json.gz",
+  "commands": 27,
+  "signals": 43
+ },
+ {
+  "make": "BMW",
+  "model": "X5",
+  "file": "BMW/X5.json.gz",
+  "commands": 37,
+  "signals": 83
+ },
+ {
+  "make": "BMW",
+  "model": "X6",
+  "file": "BMW/X6.json.gz",
+  "commands": 25,
+  "signals": 40
+ },
+ {
+  "make": "BMW",
+  "model": "X7",
+  "file": "BMW/X7.json.gz",
+  "commands": 91,
+  "signals": 171
+ },
+ {
+  "make": "BMW",
+  "model": "XM",
+  "file": "BMW/XM.json.gz",
+  "commands": 85,
+  "signals": 158
+ },
+ {
+  "make": "BMW",
+  "model": "Z4",
+  "file": "BMW/Z4.json.gz",
+  "commands": 114,
+  "signals": 242
+ },
+ {
+  "make": "BMW",
+  "model": "i3",
+  "file": "BMW/i3.json.gz",
+  "commands": 43,
+  "signals": 146
+ },
+ {
+  "make": "BMW",
+  "model": "i3s",
+  "file": "BMW/i3s.json.gz",
+  "commands": 16,
+  "signals": 62
+ },
+ {
+  "make": "BMW",
+  "model": "i4",
+  "file": "BMW/i4.json.gz",
+  "commands": 2,
+  "signals": 3
+ },
+ {
+  "make": "BMW",
+  "model": "i5",
+  "file": "BMW/i5.json.gz",
+  "commands": 33,
+  "signals": 84
+ },
+ {
+  "make": "BMW",
+  "model": "i8",
+  "file": "BMW/i8.json.gz",
+  "commands": 116,
+  "signals": 249
+ },
+ {
+  "make": "BMW",
+  "model": "iX3",
+  "file": "BMW/iX3.json.gz",
+  "commands": 60,
+  "signals": 176
+ },
+ {
+  "make": "BMW",
+  "model": "BMW",
+  "file": "BMW/BMW.json.gz",
+  "commands": 116,
+  "signals": 264
+ },
+ {
+  "make": "BYD",
+  "model": "Sealion 6",
+  "file": "BYD/Sealion-6.json.gz",
+  "commands": 169,
+  "signals": 174
+ },
+ {
+  "make": "BYD",
+  "model": "BYD",
+  "file": "BYD/BYD.json.gz",
+  "commands": 169,
+  "signals": 174
+ },
+ {
+  "make": "Bentley",
+  "model": "Bentayga",
+  "file": "Bentley/Bentayga.json.gz",
+  "commands": 450,
+  "signals": 498
+ },
+ {
+  "make": "Bentley",
+  "model": "Bentley",
+  "file": "Bentley/Bentley.json.gz",
+  "commands": 1975,
+  "signals": 3026
+ },
+ {
+  "make": "Buick",
+  "model": "Enclave",
+  "file": "Buick/Enclave.json.gz",
+  "commands": 120,
+  "signals": 120
+ },
+ {
+  "make": "Buick",
+  "model": "Encore",
+  "file": "Buick/Encore.json.gz",
+  "commands": 106,
+  "signals": 106
+ },
+ {
+  "make": "Buick",
+  "model": "Envision",
+  "file": "Buick/Envision.json.gz",
+  "commands": 155,
+  "signals": 158
+ },
+ {
+  "make": "Buick",
+  "model": "LaCrosse",
+  "file": "Buick/LaCrosse.json.gz",
+  "commands": 115,
+  "signals": 115
+ },
+ {
+  "make": "Buick",
+  "model": "Buick",
+  "file": "Buick/Buick.json.gz",
+  "commands": 616,
+  "signals": 676
+ },
+ {
+  "make": "Cadillac",
+  "model": "CT5",
+  "file": "Cadillac/CT5.json.gz",
+  "commands": 123,
+  "signals": 126
+ },
+ {
+  "make": "Cadillac",
+  "model": "CT6",
+  "file": "Cadillac/CT6.json.gz",
+  "commands": 108,
+  "signals": 108
+ },
+ {
+  "make": "Cadillac",
+  "model": "CTS",
+  "file": "Cadillac/CTS.json.gz",
+  "commands": 137,
+  "signals": 137
+ },
+ {
+  "make": "Cadillac",
+  "model": "DTS",
+  "file": "Cadillac/DTS.json.gz",
+  "commands": 115,
+  "signals": 115
+ },
+ {
+  "make": "Cadillac",
+  "model": "ELR",
+  "file": "Cadillac/ELR.json.gz",
+  "commands": 275,
+  "signals": 275
+ },
+ {
+  "make": "Cadillac",
+  "model": "Escalade",
+  "file": "Cadillac/Escalade.json.gz",
+  "commands": 146,
+  "signals": 149
+ },
+ {
+  "make": "Cadillac",
+  "model": "LYRIQ",
+  "file": "Cadillac/LYRIQ.json.gz",
+  "commands": 25,
+  "signals": 30
+ },
+ {
+  "make": "Cadillac",
+  "model": "SRX",
+  "file": "Cadillac/SRX.json.gz",
+  "commands": 106,
+  "signals": 106
+ },
+ {
+  "make": "Cadillac",
+  "model": "XT5",
+  "file": "Cadillac/XT5.json.gz",
+  "commands": 124,
+  "signals": 124
+ },
+ {
+  "make": "Cadillac",
+  "model": "Cadillac",
+  "file": "Cadillac/Cadillac.json.gz",
+  "commands": 616,
+  "signals": 682
+ },
+ {
+  "make": "Chevrolet",
+  "model": "Avalanche",
+  "file": "Chevrolet/Avalanche.json.gz",
+  "commands": 120,
+  "signals": 120
+ },
+ {
+  "make": "Chevrolet",
+  "model": "Aveo",
+  "file": "Chevrolet/Aveo.json.gz",
+  "commands": 116,
+  "signals": 116
+ },
+ {
+  "make": "Chevrolet",
+  "model": "Blazer",
+  "file": "Chevrolet/Blazer.json.gz",
+  "commands": 180,
+  "signals": 183
+ },
+ {
+  "make": "Chevrolet",
+  "model": "Bolt EUV",
+  "file": "Chevrolet/Bolt-EUV.json.gz",
+  "commands": 292,
+  "signals": 293
+ },
+ {
+  "make": "Chevrolet",
+  "model": "Bolt EV",
+  "file": "Chevrolet/Bolt-EV.json.gz",
+  "commands": 294,
+  "signals": 295
+ },
+ {
+  "make": "Chevrolet",
+  "model": "Camaro",
+  "file": "Chevrolet/Camaro.json.gz",
+  "commands": 133,
+  "signals": 136
+ },
+ {
+  "make": "Chevrolet",
+  "model": "Caprice",
+  "file": "Chevrolet/Caprice.json.gz",
+  "commands": 129,
+  "signals": 129
+ },
+ {
+  "make": "Chevrolet",
+  "model": "Cobalt",
+  "file": "Chevrolet/Cobalt.json.gz",
+  "commands": 107,
+  "signals": 107
+ },
+ {
+  "make": "Chevrolet",
+  "model": "Colorado",
+  "file": "Chevrolet/Colorado.json.gz",
+  "commands": 146,
+  "signals": 146
+ },
+ {
+  "make": "Chevrolet",
+  "model": "Corvette",
+  "file": "Chevrolet/Corvette.json.gz",
+  "commands": 152,
+  "signals": 155
+ },
+ {
+  "make": "Chevrolet",
+  "model": "Cruze Limited",
+  "file": "Chevrolet/Cruze-Limited.json.gz",
+  "commands": 104,
+  "signals": 104
+ },
+ {
+  "make": "Chevrolet",
+  "model": "Cruze",
+  "file": "Chevrolet/Cruze.json.gz",
+  "commands": 108,
+  "signals": 108
+ },
+ {
+  "make": "Chevrolet",
+  "model": "Equinox EV",
+  "file": "Chevrolet/Equinox-EV.json.gz",
+  "commands": 4,
+  "signals": 6
+ },
+ {
+  "make": "Chevrolet",
+  "model": "Equinox",
+  "file": "Chevrolet/Equinox.json.gz",
+  "commands": 126,
+  "signals": 126
+ },
+ {
+  "make": "Chevrolet",
+  "model": "Express",
+  "file": "Chevrolet/Express.json.gz",
+  "commands": 99,
+  "signals": 99
+ },
+ {
+  "make": "Chevrolet",
+  "model": "HHR",
+  "file": "Chevrolet/HHR.json.gz",
+  "commands": 102,
+  "signals": 102
+ },
+ {
+  "make": "Chevrolet",
+  "model": "Impala Limited",
+  "file": "Chevrolet/Impala-Limited.json.gz",
+  "commands": 104,
+  "signals": 104
+ },
+ {
+  "make": "Chevrolet",
+  "model": "Impala",
+  "file": "Chevrolet/Impala.json.gz",
+  "commands": 106,
+  "signals": 106
+ },
+ {
+  "make": "Chevrolet",
+  "model": "Malibu",
+  "file": "Chevrolet/Malibu.json.gz",
+  "commands": 106,
+  "signals": 106
+ },
+ {
+  "make": "Chevrolet",
+  "model": "Orlando",
+  "file": "Chevrolet/Orlando.json.gz",
+  "commands": 104,
+  "signals": 104
+ },
+ {
+  "make": "Chevrolet",
+  "model": "S 10",
+  "file": "Chevrolet/S-10.json.gz",
+  "commands": 107,
+  "signals": 107
+ },
+ {
+  "make": "Chevrolet",
+  "model": "Sail",
+  "file": "Chevrolet/Sail.json.gz",
+  "commands": 78,
+  "signals": 78
+ },
+ {
+  "make": "Chevrolet",
+  "model": "Silverado 1500",
+  "file": "Chevrolet/Silverado-1500.json.gz",
+  "commands": 203,
+  "signals": 206
+ },
+ {
+  "make": "Chevrolet",
+  "model": "Silverado 2500",
+  "file": "Chevrolet/Silverado-2500.json.gz",
+  "commands": 252,
+  "signals": 255
+ },
+ {
+  "make": "Chevrolet",
+  "model": "Silverado 3500",
+  "file": "Chevrolet/Silverado-3500.json.gz",
+  "commands": 194,
+  "signals": 197
+ },
+ {
+  "make": "Chevrolet",
+  "model": "Silverado",
+  "file": "Chevrolet/Silverado.json.gz",
+  "commands": 136,
+  "signals": 136
+ },
+ {
+  "make": "Chevrolet",
+  "model": "Spark",
+  "file": "Chevrolet/Spark.json.gz",
+  "commands": 99,
+  "signals": 99
+ },
+ {
+  "make": "Chevrolet",
+  "model": "Spin",
+  "file": "Chevrolet/Spin.json.gz",
+  "commands": 93,
+  "signals": 93
+ },
+ {
+  "make": "Chevrolet",
+  "model": "Tahoe",
+  "file": "Chevrolet/Tahoe.json.gz",
+  "commands": 153,
+  "signals": 156
+ },
+ {
+  "make": "Chevrolet",
+  "model": "Trailblazer",
+  "file": "Chevrolet/Trailblazer.json.gz",
+  "commands": 94,
+  "signals": 94
+ },
+ {
+  "make": "Chevrolet",
+  "model": "Traverse",
+  "file": "Chevrolet/Traverse.json.gz",
+  "commands": 130,
+  "signals": 133
+ },
+ {
+  "make": "Chevrolet",
+  "model": "Trax",
+  "file": "Chevrolet/Trax.json.gz",
+  "commands": 114,
+  "signals": 114
+ },
+ {
+  "make": "Chevrolet",
+  "model": "Volt",
+  "file": "Chevrolet/Volt.json.gz",
+  "commands": 275,
+  "signals": 275
+ },
+ {
+  "make": "Chevrolet",
+  "model": "Chevrolet",
+  "file": "Chevrolet/Chevrolet.json.gz",
+  "commands": 616,
+  "signals": 678
+ },
+ {
+  "make": "Chrysler",
+  "model": "200",
+  "file": "Chrysler/200.json.gz",
+  "commands": 128,
+  "signals": 162
+ },
+ {
+  "make": "Chrysler",
+  "model": "300",
+  "file": "Chrysler/300.json.gz",
+  "commands": 109,
+  "signals": 142
+ },
+ {
+  "make": "Chrysler",
+  "model": "Pacifica",
+  "file": "Chrysler/Pacifica.json.gz",
+  "commands": 66,
+  "signals": 99
+ },
+ {
+  "make": "Chrysler",
+  "model": "Chrysler",
+  "file": "Chrysler/Chrysler.json.gz",
+  "commands": 711,
+  "signals": 1202
+ },
+ {
+  "make": "Citroen",
+  "model": "eC4 X",
+  "file": "Citroen/eC4-X.json.gz",
+  "commands": 1,
+  "signals": 1
+ },
+ {
+  "make": "Citroen",
+  "model": "Citroen",
+  "file": "Citroen/Citroen.json.gz",
+  "commands": 711,
+  "signals": 1202
+ },
+ {
+  "make": "Cupra",
+  "model": "Born",
+  "file": "Cupra/Born.json.gz",
+  "commands": 236,
+  "signals": 275
+ },
+ {
+  "make": "Cupra",
+  "model": "Formentor",
+  "file": "Cupra/Formentor.json.gz",
+  "commands": 315,
+  "signals": 369
+ },
+ {
+  "make": "Cupra",
+  "model": "Leon",
+  "file": "Cupra/Leon.json.gz",
+  "commands": 846,
+  "signals": 916
+ },
+ {
+  "make": "Cupra",
+  "model": "Tavascan",
+  "file": "Cupra/Tavascan.json.gz",
+  "commands": 221,
+  "signals": 256
+ },
+ {
+  "make": "Cupra",
+  "model": "Terramar",
+  "file": "Cupra/Terramar.json.gz",
+  "commands": 54,
+  "signals": 84
+ },
+ {
+  "make": "Cupra",
+  "model": "Cupra",
+  "file": "Cupra/Cupra.json.gz",
+  "commands": 1975,
+  "signals": 3003
+ },
+ {
+  "make": "DS",
+  "model": "DS",
+  "file": "DS/DS.json.gz",
+  "commands": 711,
+  "signals": 1202
+ },
+ {
+  "make": "Dacia",
+  "model": "Dokker",
+  "file": "Dacia/Dokker.json.gz",
+  "commands": 255,
+  "signals": 297
+ },
+ {
+  "make": "Dacia",
+  "model": "Duster",
+  "file": "Dacia/Duster.json.gz",
+  "commands": 109,
+  "signals": 119
+ },
+ {
+  "make": "Dacia",
+  "model": "Sandero",
+  "file": "Dacia/Sandero.json.gz",
+  "commands": 329,
+  "signals": 371
+ },
+ {
+  "make": "Dacia",
+  "model": "Dacia",
+  "file": "Dacia/Dacia.json.gz",
+  "commands": 1280,
+  "signals": 2246
+ },
+ {
+  "make": "Daihatsu",
+  "model": "Hijet",
+  "file": "Daihatsu/Hijet.json.gz",
+  "commands": 82,
+  "signals": 306
+ },
+ {
+  "make": "Daihatsu",
+  "model": "Terios",
+  "file": "Daihatsu/Terios.json.gz",
+  "commands": 79,
+  "signals": 303
+ },
+ {
+  "make": "Daihatsu",
+  "model": "Daihatsu",
+  "file": "Daihatsu/Daihatsu.json.gz",
+  "commands": 578,
+  "signals": 1556
+ },
+ {
+  "make": "Datsun",
+  "model": "Datsun",
+  "file": "Datsun/Datsun.json.gz",
+  "commands": 481,
+  "signals": 888
+ },
+ {
+  "make": "Dodge",
+  "model": "Caliber",
+  "file": "Dodge/Caliber.json.gz",
+  "commands": 103,
+  "signals": 133
+ },
+ {
+  "make": "Dodge",
+  "model": "Challenger",
+  "file": "Dodge/Challenger.json.gz",
+  "commands": 70,
+  "signals": 78
+ },
+ {
+  "make": "Dodge",
+  "model": "Charger",
+  "file": "Dodge/Charger.json.gz",
+  "commands": 84,
+  "signals": 100
+ },
+ {
+  "make": "Dodge",
+  "model": "Dakota",
+  "file": "Dodge/Dakota.json.gz",
+  "commands": 114,
+  "signals": 146
+ },
+ {
+  "make": "Dodge",
+  "model": "Dart",
+  "file": "Dodge/Dart.json.gz",
+  "commands": 12,
+  "signals": 12
+ },
+ {
+  "make": "Dodge",
+  "model": "Durango",
+  "file": "Dodge/Durango.json.gz",
+  "commands": 64,
+  "signals": 83
+ },
+ {
+  "make": "Dodge",
+  "model": "Hornet",
+  "file": "Dodge/Hornet.json.gz",
+  "commands": 46,
+  "signals": 47
+ },
+ {
+  "make": "Dodge",
+  "model": "Journey",
+  "file": "Dodge/Journey.json.gz",
+  "commands": 113,
+  "signals": 140
+ },
+ {
+  "make": "Dodge",
+  "model": "Dodge",
+  "file": "Dodge/Dodge.json.gz",
+  "commands": 711,
+  "signals": 1205
+ },
+ {
+  "make": "Fiat",
+  "model": "500",
+  "file": "Fiat/500.json.gz",
+  "commands": 65,
+  "signals": 70
+ },
+ {
+  "make": "Fiat",
+  "model": "500X",
+  "file": "Fiat/500X.json.gz",
+  "commands": 65,
+  "signals": 66
+ },
+ {
+  "make": "Fiat",
+  "model": "500e",
+  "file": "Fiat/500e.json.gz",
+  "commands": 43,
+  "signals": 280
+ },
+ {
+  "make": "Fiat",
+  "model": "Bravo",
+  "file": "Fiat/Bravo.json.gz",
+  "commands": 31,
+  "signals": 31
+ },
+ {
+  "make": "Fiat",
+  "model": "Fastback",
+  "file": "Fiat/Fastback.json.gz",
+  "commands": 29,
+  "signals": 29
+ },
+ {
+  "make": "Fiat",
+  "model": "Panda",
+  "file": "Fiat/Panda.json.gz",
+  "commands": 53,
+  "signals": 58
+ },
+ {
+  "make": "Fiat",
+  "model": "Qubo",
+  "file": "Fiat/Qubo.json.gz",
+  "commands": 21,
+  "signals": 21
+ },
+ {
+  "make": "Fiat",
+  "model": "Fiat",
+  "file": "Fiat/Fiat.json.gz",
+  "commands": 711,
+  "signals": 1202
+ },
+ {
+  "make": "Ford",
+  "model": "B Max",
+  "file": "Ford/B-Max.json.gz",
+  "commands": 191,
+  "signals": 202
+ },
+ {
+  "make": "Ford",
+  "model": "Bronco Sport",
+  "file": "Ford/Bronco-Sport.json.gz",
+  "commands": 299,
+  "signals": 316
+ },
+ {
+  "make": "Ford",
+  "model": "Bronco",
+  "file": "Ford/Bronco.json.gz",
+  "commands": 195,
+  "signals": 206
+ },
+ {
+  "make": "Ford",
+  "model": "C Max Energi",
+  "file": "Ford/C-Max-Energi.json.gz",
+  "commands": 161,
+  "signals": 178
+ },
+ {
+  "make": "Ford",
+  "model": "C Max Hybrid",
+  "file": "Ford/C-Max-Hybrid.json.gz",
+  "commands": 153,
+  "signals": 170
+ },
+ {
+  "make": "Ford",
+  "model": "C Max",
+  "file": "Ford/C-Max.json.gz",
+  "commands": 286,
+  "signals": 303
+ },
+ {
+  "make": "Ford",
+  "model": "Crown Victoria",
+  "file": "Ford/Crown-Victoria.json.gz",
+  "commands": 5,
+  "signals": 5
+ },
+ {
+  "make": "Ford",
+  "model": "E Series Wagon",
+  "file": "Ford/E-Series-Wagon.json.gz",
+  "commands": 254,
+  "signals": 260
+ },
+ {
+  "make": "Ford",
+  "model": "EcoSport",
+  "file": "Ford/EcoSport.json.gz",
+  "commands": 199,
+  "signals": 213
+ },
+ {
+  "make": "Ford",
+  "model": "Edge",
+  "file": "Ford/Edge.json.gz",
+  "commands": 68,
+  "signals": 72
+ },
+ {
+  "make": "Ford",
+  "model": "Escape",
+  "file": "Ford/Escape.json.gz",
+  "commands": 113,
+  "signals": 113
+ },
+ {
+  "make": "Ford",
+  "model": "Everest",
+  "file": "Ford/Everest.json.gz",
+  "commands": 261,
+  "signals": 278
+ },
+ {
+  "make": "Ford",
+  "model": "Expedition",
+  "file": "Ford/Expedition.json.gz",
+  "commands": 292,
+  "signals": 309
+ },
+ {
+  "make": "Ford",
+  "model": "Explorer Sport Trac",
+  "file": "Ford/Explorer-Sport-Trac.json.gz",
+  "commands": 240,
+  "signals": 253
+ },
+ {
+  "make": "Ford",
+  "model": "Explorer",
+  "file": "Ford/Explorer.json.gz",
+  "commands": 288,
+  "signals": 305
+ },
+ {
+  "make": "Ford",
+  "model": "F 150 Lightning",
+  "file": "Ford/F-150-Lightning.json.gz",
+  "commands": 131,
+  "signals": 144
+ },
+ {
+  "make": "Ford",
+  "model": "F 150",
+  "file": "Ford/F-150.json.gz",
+  "commands": 116,
+  "signals": 116
+ },
+ {
+  "make": "Ford",
+  "model": "F 250",
+  "file": "Ford/F-250.json.gz",
+  "commands": 267,
+  "signals": 282
+ },
+ {
+  "make": "Ford",
+  "model": "F 350",
+  "file": "Ford/F-350.json.gz",
+  "commands": 267,
+  "signals": 282
+ },
+ {
+  "make": "Ford",
+  "model": "Fiesta",
+  "file": "Ford/Fiesta.json.gz",
+  "commands": 192,
+  "signals": 203
+ },
+ {
+  "make": "Ford",
+  "model": "Flex",
+  "file": "Ford/Flex.json.gz",
+  "commands": 112,
+  "signals": 115
+ },
+ {
+  "make": "Ford",
+  "model": "Focus Electric",
+  "file": "Ford/Focus-Electric.json.gz",
+  "commands": 26,
+  "signals": 32
+ },
+ {
+  "make": "Ford",
+  "model": "Focus RS",
+  "file": "Ford/Focus-RS.json.gz",
+  "commands": 163,
+  "signals": 179
+ },
+ {
+  "make": "Ford",
+  "model": "Focus ST",
+  "file": "Ford/Focus-ST.json.gz",
+  "commands": 210,
+  "signals": 224
+ },
+ {
+  "make": "Ford",
+  "model": "Focus",
+  "file": "Ford/Focus.json.gz",
+  "commands": 197,
+  "signals": 211
+ },
+ {
+  "make": "Ford",
+  "model": "Fusion Energi",
+  "file": "Ford/Fusion-Energi.json.gz",
+  "commands": 50,
+  "signals": 50
+ },
+ {
+  "make": "Ford",
+  "model": "Fusion Hybrid",
+  "file": "Ford/Fusion-Hybrid.json.gz",
+  "commands": 189,
+  "signals": 201
+ },
+ {
+  "make": "Ford",
+  "model": "Fusion",
+  "file": "Ford/Fusion.json.gz",
+  "commands": 201,
+  "signals": 215
+ },
+ {
+  "make": "Ford",
+  "model": "Kuga",
+  "file": "Ford/Kuga.json.gz",
+  "commands": 307,
+  "signals": 324
+ },
+ {
+  "make": "Ford",
+  "model": "Maverick",
+  "file": "Ford/Maverick.json.gz",
+  "commands": 244,
+  "signals": 261
+ },
+ {
+  "make": "Ford",
+  "model": "Mondeo",
+  "file": "Ford/Mondeo.json.gz",
+  "commands": 228,
+  "signals": 243
+ },
+ {
+  "make": "Ford",
+  "model": "Mustang Mach E",
+  "file": "Ford/Mustang-Mach-E.json.gz",
+  "commands": 169,
+  "signals": 188
+ },
+ {
+  "make": "Ford",
+  "model": "Mustang",
+  "file": "Ford/Mustang.json.gz",
+  "commands": 297,
+  "signals": 314
+ },
+ {
+  "make": "Ford",
+  "model": "Puma",
+  "file": "Ford/Puma.json.gz",
+  "commands": 205,
+  "signals": 219
+ },
+ {
+  "make": "Ford",
+  "model": "Ranger",
+  "file": "Ford/Ranger.json.gz",
+  "commands": 202,
+  "signals": 215
+ },
+ {
+  "make": "Ford",
+  "model": "S Max",
+  "file": "Ford/S-Max.json.gz",
+  "commands": 146,
+  "signals": 151
+ },
+ {
+  "make": "Ford",
+  "model": "Taurus X",
+  "file": "Ford/Taurus-X.json.gz",
+  "commands": 254,
+  "signals": 260
+ },
+ {
+  "make": "Ford",
+  "model": "Taurus",
+  "file": "Ford/Taurus.json.gz",
+  "commands": 180,
+  "signals": 190
+ },
+ {
+  "make": "Ford",
+  "model": "Territory",
+  "file": "Ford/Territory.json.gz",
+  "commands": 278,
+  "signals": 284
+ },
+ {
+  "make": "Ford",
+  "model": "Tourneo",
+  "file": "Ford/Tourneo.json.gz",
+  "commands": 285,
+  "signals": 299
+ },
+ {
+  "make": "Ford",
+  "model": "Transit Connect",
+  "file": "Ford/Transit-Connect.json.gz",
+  "commands": 277,
+  "signals": 294
+ },
+ {
+  "make": "Ford",
+  "model": "Transit",
+  "file": "Ford/Transit.json.gz",
+  "commands": 348,
+  "signals": 368
+ },
+ {
+  "make": "Ford",
+  "model": "Ford",
+  "file": "Ford/Ford.json.gz",
+  "commands": 419,
+  "signals": 523
+ },
+ {
+  "make": "GMC",
+  "model": "Acadia",
+  "file": "GMC/Acadia.json.gz",
+  "commands": 120,
+  "signals": 123
+ },
+ {
+  "make": "GMC",
+  "model": "Canyon",
+  "file": "GMC/Canyon.json.gz",
+  "commands": 147,
+  "signals": 150
+ },
+ {
+  "make": "GMC",
+  "model": "Sierra 1500",
+  "file": "GMC/Sierra-1500.json.gz",
+  "commands": 19,
+  "signals": 19
+ },
+ {
+  "make": "GMC",
+  "model": "Sierra 2500HD",
+  "file": "GMC/Sierra-2500HD.json.gz",
+  "commands": 179,
+  "signals": 182
+ },
+ {
+  "make": "GMC",
+  "model": "Sierra 3500HD",
+  "file": "GMC/Sierra-3500HD.json.gz",
+  "commands": 166,
+  "signals": 166
+ },
+ {
+  "make": "GMC",
+  "model": "Terrain",
+  "file": "GMC/Terrain.json.gz",
+  "commands": 188,
+  "signals": 191
+ },
+ {
+  "make": "GMC",
+  "model": "Yukon",
+  "file": "GMC/Yukon.json.gz",
+  "commands": 187,
+  "signals": 190
+ },
+ {
+  "make": "GMC",
+  "model": "GMC",
+  "file": "GMC/GMC.json.gz",
+  "commands": 616,
+  "signals": 677
+ },
+ {
+  "make": "Genesis",
+  "model": "G70",
+  "file": "Genesis/G70.json.gz",
+  "commands": 92,
+  "signals": 439
+ },
+ {
+  "make": "Genesis",
+  "model": "G80",
+  "file": "Genesis/G80.json.gz",
+  "commands": 76,
+  "signals": 380
+ },
+ {
+  "make": "Genesis",
+  "model": "GV60",
+  "file": "Genesis/GV60.json.gz",
+  "commands": 35,
+  "signals": 394
+ },
+ {
+  "make": "Genesis",
+  "model": "GV80",
+  "file": "Genesis/GV80.json.gz",
+  "commands": 36,
+  "signals": 167
+ },
+ {
+  "make": "Genesis",
+  "model": "Genesis",
+  "file": "Genesis/Genesis.json.gz",
+  "commands": 147,
+  "signals": 1613
+ },
+ {
+  "make": "Haval",
+  "model": "H6 HEV",
+  "file": "Haval/H6-HEV.json.gz",
+  "commands": 69,
+  "signals": 175
+ },
+ {
+  "make": "Haval",
+  "model": "Jolion HEV",
+  "file": "Haval/Jolion-HEV.json.gz",
+  "commands": 99,
+  "signals": 103
+ },
+ {
+  "make": "Haval",
+  "model": "Jolion",
+  "file": "Haval/Jolion.json.gz",
+  "commands": 62,
+  "signals": 69
+ },
+ {
+  "make": "Haval",
+  "model": "Haval",
+  "file": "Haval/Haval.json.gz",
+  "commands": 106,
+  "signals": 224
+ },
+ {
+  "make": "Holden",
+  "model": "Colorado",
+  "file": "Holden/Colorado.json.gz",
+  "commands": 115,
+  "signals": 115
+ },
+ {
+  "make": "Holden",
+  "model": "Commodore",
+  "file": "Holden/Commodore.json.gz",
+  "commands": 130,
+  "signals": 130
+ },
+ {
+  "make": "Holden",
+  "model": "Cruze",
+  "file": "Holden/Cruze.json.gz",
+  "commands": 108,
+  "signals": 108
+ },
+ {
+  "make": "Holden",
+  "model": "Holden",
+  "file": "Holden/Holden.json.gz",
+  "commands": 616,
+  "signals": 682
+ },
+ {
+  "make": "Honda",
+  "model": "Accord Hybrid",
+  "file": "Honda/Accord-Hybrid.json.gz",
+  "commands": 32,
+  "signals": 154
+ },
+ {
+  "make": "Honda",
+  "model": "Accord",
+  "file": "Honda/Accord.json.gz",
+  "commands": 34,
+  "signals": 72
+ },
+ {
+  "make": "Honda",
+  "model": "CR V Hybrid",
+  "file": "Honda/CR-V-Hybrid.json.gz",
+  "commands": 47,
+  "signals": 287
+ },
+ {
+  "make": "Honda",
+  "model": "CR V",
+  "file": "Honda/CR-V.json.gz",
+  "commands": 33,
+  "signals": 78
+ },
+ {
+  "make": "Honda",
+  "model": "CR Z",
+  "file": "Honda/CR-Z.json.gz",
+  "commands": 27,
+  "signals": 56
+ },
+ {
+  "make": "Honda",
+  "model": "City",
+  "file": "Honda/City.json.gz",
+  "commands": 17,
+  "signals": 34
+ },
+ {
+  "make": "Honda",
+  "model": "Civic",
+  "file": "Honda/Civic.json.gz",
+  "commands": 36,
+  "signals": 173
+ },
+ {
+  "make": "Honda",
+  "model": "Clarity",
+  "file": "Honda/Clarity.json.gz",
+  "commands": 53,
+  "signals": 298
+ },
+ {
+  "make": "Honda",
+  "model": "Crosstour",
+  "file": "Honda/Crosstour.json.gz",
+  "commands": 13,
+  "signals": 37
+ },
+ {
+  "make": "Honda",
+  "model": "Element",
+  "file": "Honda/Element.json.gz",
+  "commands": 44,
+  "signals": 107
+ },
+ {
+  "make": "Honda",
+  "model": "Fit",
+  "file": "Honda/Fit.json.gz",
+  "commands": 46,
+  "signals": 163
+ },
+ {
+  "make": "Honda",
+  "model": "HR V",
+  "file": "Honda/HR-V.json.gz",
+  "commands": 34,
+  "signals": 92
+ },
+ {
+  "make": "Honda",
+  "model": "Insight",
+  "file": "Honda/Insight.json.gz",
+  "commands": 39,
+  "signals": 168
+ },
+ {
+  "make": "Honda",
+  "model": "Jazz",
+  "file": "Honda/Jazz.json.gz",
+  "commands": 28,
+  "signals": 64
+ },
+ {
+  "make": "Honda",
+  "model": "Odyssey",
+  "file": "Honda/Odyssey.json.gz",
+  "commands": 40,
+  "signals": 101
+ },
+ {
+  "make": "Honda",
+  "model": "Pilot",
+  "file": "Honda/Pilot.json.gz",
+  "commands": 45,
+  "signals": 120
+ },
+ {
+  "make": "Honda",
+  "model": "Prelude",
+  "file": "Honda/Prelude.json.gz",
+  "commands": 19,
+  "signals": 133
+ },
+ {
+  "make": "Honda",
+  "model": "Prologue",
+  "file": "Honda/Prologue.json.gz",
+  "commands": 25,
+  "signals": 30
+ },
+ {
+  "make": "Honda",
+  "model": "Ridgeline",
+  "file": "Honda/Ridgeline.json.gz",
+  "commands": 30,
+  "signals": 67
+ },
+ {
+  "make": "Honda",
+  "model": "S2000",
+  "file": "Honda/S2000.json.gz",
+  "commands": 8,
+  "signals": 16
+ },
+ {
+  "make": "Honda",
+  "model": "Shuttle",
+  "file": "Honda/Shuttle.json.gz",
+  "commands": 17,
+  "signals": 41
+ },
+ {
+  "make": "Honda",
+  "model": "ZR V",
+  "file": "Honda/ZR-V.json.gz",
+  "commands": 52,
+  "signals": 111
+ },
+ {
+  "make": "Honda",
+  "model": "Honda",
+  "file": "Honda/Honda.json.gz",
+  "commands": 90,
+  "signals": 375
+ },
+ {
+  "make": "Hyundai",
+  "model": "Accent",
+  "file": "Hyundai/Accent.json.gz",
+  "commands": 52,
+  "signals": 269
+ },
+ {
+  "make": "Hyundai",
+  "model": "Azera",
+  "file": "Hyundai/Azera.json.gz",
+  "commands": 31,
+  "signals": 156
+ },
+ {
+  "make": "Hyundai",
+  "model": "Elantra",
+  "file": "Hyundai/Elantra.json.gz",
+  "commands": 78,
+  "signals": 478
+ },
+ {
+  "make": "Hyundai",
+  "model": "HB20",
+  "file": "Hyundai/HB20.json.gz",
+  "commands": 59,
+  "signals": 324
+ },
+ {
+  "make": "Hyundai",
+  "model": "HB20S",
+  "file": "Hyundai/HB20S.json.gz",
+  "commands": 59,
+  "signals": 324
+ },
+ {
+  "make": "Hyundai",
+  "model": "IONIQ 5",
+  "file": "Hyundai/IONIQ-5.json.gz",
+  "commands": 38,
+  "signals": 397
+ },
+ {
+  "make": "Hyundai",
+  "model": "IONIQ 6",
+  "file": "Hyundai/IONIQ-6.json.gz",
+  "commands": 39,
+  "signals": 402
+ },
+ {
+  "make": "Hyundai",
+  "model": "IONIQ 9",
+  "file": "Hyundai/IONIQ-9.json.gz",
+  "commands": 46,
+  "signals": 381
+ },
+ {
+  "make": "Hyundai",
+  "model": "IONIQ Electric",
+  "file": "Hyundai/IONIQ-Electric.json.gz",
+  "commands": 118,
+  "signals": 907
+ },
+ {
+  "make": "Hyundai",
+  "model": "IONIQ PlugIn Hybrid",
+  "file": "Hyundai/IONIQ-PlugIn-Hybrid.json.gz",
+  "commands": 5,
+  "signals": 102
+ },
+ {
+  "make": "Hyundai",
+  "model": "Kona Electric",
+  "file": "Hyundai/Kona-Electric.json.gz",
+  "commands": 112,
+  "signals": 760
+ },
+ {
+  "make": "Hyundai",
+  "model": "Kona",
+  "file": "Hyundai/Kona.json.gz",
+  "commands": 36,
+  "signals": 241
+ },
+ {
+  "make": "Hyundai",
+  "model": "Palisade",
+  "file": "Hyundai/Palisade.json.gz",
+  "commands": 96,
+  "signals": 667
+ },
+ {
+  "make": "Hyundai",
+  "model": "Santa Cruz",
+  "file": "Hyundai/Santa-Cruz.json.gz",
+  "commands": 39,
+  "signals": 160
+ },
+ {
+  "make": "Hyundai",
+  "model": "Santa Fe Hybrid",
+  "file": "Hyundai/Santa-Fe-Hybrid.json.gz",
+  "commands": 122,
+  "signals": 851
+ },
+ {
+  "make": "Hyundai",
+  "model": "Santa Fe",
+  "file": "Hyundai/Santa-Fe.json.gz",
+  "commands": 82,
+  "signals": 424
+ },
+ {
+  "make": "Hyundai",
+  "model": "Sonata",
+  "file": "Hyundai/Sonata.json.gz",
+  "commands": 119,
+  "signals": 867
+ },
+ {
+  "make": "Hyundai",
+  "model": "Tucson Hybrid",
+  "file": "Hyundai/Tucson-Hybrid.json.gz",
+  "commands": 129,
+  "signals": 899
+ },
+ {
+  "make": "Hyundai",
+  "model": "Tucson",
+  "file": "Hyundai/Tucson.json.gz",
+  "commands": 94,
+  "signals": 454
+ },
+ {
+  "make": "Hyundai",
+  "model": "Veloster",
+  "file": "Hyundai/Veloster.json.gz",
+  "commands": 93,
+  "signals": 465
+ },
+ {
+  "make": "Hyundai",
+  "model": "Venue",
+  "file": "Hyundai/Venue.json.gz",
+  "commands": 58,
+  "signals": 275
+ },
+ {
+  "make": "Hyundai",
+  "model": "Veracruz",
+  "file": "Hyundai/Veracruz.json.gz",
+  "commands": 79,
+  "signals": 418
+ },
+ {
+  "make": "Hyundai",
+  "model": "Verna",
+  "file": "Hyundai/Verna.json.gz",
+  "commands": 52,
+  "signals": 269
+ },
+ {
+  "make": "Hyundai",
+  "model": "i10",
+  "file": "Hyundai/i10.json.gz",
+  "commands": 97,
+  "signals": 459
+ },
+ {
+  "make": "Hyundai",
+  "model": "i20",
+  "file": "Hyundai/i20.json.gz",
+  "commands": 94,
+  "signals": 437
+ },
+ {
+  "make": "Hyundai",
+  "model": "i40",
+  "file": "Hyundai/i40.json.gz",
+  "commands": 76,
+  "signals": 383
+ },
+ {
+  "make": "Hyundai",
+  "model": "Hyundai",
+  "file": "Hyundai/Hyundai.json.gz",
+  "commands": 147,
+  "signals": 1539
+ },
+ {
+  "make": "INFINITI",
+  "model": "Q50",
+  "file": "INFINITI/Q50.json.gz",
+  "commands": 73,
+  "signals": 84
+ },
+ {
+  "make": "INFINITI",
+  "model": "Q60",
+  "file": "INFINITI/Q60.json.gz",
+  "commands": 67,
+  "signals": 78
+ },
+ {
+  "make": "INFINITI",
+  "model": "QX50",
+  "file": "INFINITI/QX50.json.gz",
+  "commands": 106,
+  "signals": 119
+ },
+ {
+  "make": "INFINITI",
+  "model": "QX55",
+  "file": "INFINITI/QX55.json.gz",
+  "commands": 30,
+  "signals": 40
+ },
+ {
+  "make": "INFINITI",
+  "model": "QX60",
+  "file": "INFINITI/QX60.json.gz",
+  "commands": 68,
+  "signals": 77
+ },
+ {
+  "make": "INFINITI",
+  "model": "QX70",
+  "file": "INFINITI/QX70.json.gz",
+  "commands": 68,
+  "signals": 79
+ },
+ {
+  "make": "INFINITI",
+  "model": "QX80",
+  "file": "INFINITI/QX80.json.gz",
+  "commands": 25,
+  "signals": 40
+ },
+ {
+  "make": "INFINITI",
+  "model": "INFINITI",
+  "file": "INFINITI/INFINITI.json.gz",
+  "commands": 481,
+  "signals": 887
+ },
+ {
+  "make": "Jaguar",
+  "model": "E PACE",
+  "file": "Jaguar/E-PACE.json.gz",
+  "commands": 57,
+  "signals": 61
+ },
+ {
+  "make": "Jaguar",
+  "model": "F PACE",
+  "file": "Jaguar/F-PACE.json.gz",
+  "commands": 79,
+  "signals": 100
+ },
+ {
+  "make": "Jaguar",
+  "model": "F TYPE",
+  "file": "Jaguar/F-TYPE.json.gz",
+  "commands": 44,
+  "signals": 65
+ },
+ {
+  "make": "Jaguar",
+  "model": "I PACE",
+  "file": "Jaguar/I-PACE.json.gz",
+  "commands": 23,
+  "signals": 23
+ },
+ {
+  "make": "Jaguar",
+  "model": "Jaguar",
+  "file": "Jaguar/Jaguar.json.gz",
+  "commands": 171,
+  "signals": 214
+ },
+ {
+  "make": "Jeep",
+  "model": "Avenger",
+  "file": "Jeep/Avenger.json.gz",
+  "commands": 352,
+  "signals": 482
+ },
+ {
+  "make": "Jeep",
+  "model": "Cherokee",
+  "file": "Jeep/Cherokee.json.gz",
+  "commands": 70,
+  "signals": 91
+ },
+ {
+  "make": "Jeep",
+  "model": "Compass",
+  "file": "Jeep/Compass.json.gz",
+  "commands": 159,
+  "signals": 201
+ },
+ {
+  "make": "Jeep",
+  "model": "Gladiator",
+  "file": "Jeep/Gladiator.json.gz",
+  "commands": 126,
+  "signals": 172
+ },
+ {
+  "make": "Jeep",
+  "model": "Grand Cherokee",
+  "file": "Jeep/Grand-Cherokee.json.gz",
+  "commands": 159,
+  "signals": 226
+ },
+ {
+  "make": "Jeep",
+  "model": "Grand Wagoneer",
+  "file": "Jeep/Grand-Wagoneer.json.gz",
+  "commands": 41,
+  "signals": 53
+ },
+ {
+  "make": "Jeep",
+  "model": "Patriot",
+  "file": "Jeep/Patriot.json.gz",
+  "commands": 103,
+  "signals": 133
+ },
+ {
+  "make": "Jeep",
+  "model": "Renegade",
+  "file": "Jeep/Renegade.json.gz",
+  "commands": 56,
+  "signals": 57
+ },
+ {
+  "make": "Jeep",
+  "model": "Wagoneer L",
+  "file": "Jeep/Wagoneer-L.json.gz",
+  "commands": 39,
+  "signals": 48
+ },
+ {
+  "make": "Jeep",
+  "model": "Wrangler 4xe",
+  "file": "Jeep/Wrangler-4xe.json.gz",
+  "commands": 84,
+  "signals": 123
+ },
+ {
+  "make": "Jeep",
+  "model": "Wrangler JK",
+  "file": "Jeep/Wrangler-JK.json.gz",
+  "commands": 72,
+  "signals": 105
+ },
+ {
+  "make": "Jeep",
+  "model": "Wrangler",
+  "file": "Jeep/Wrangler.json.gz",
+  "commands": 97,
+  "signals": 130
+ },
+ {
+  "make": "Jeep",
+  "model": "Jeep",
+  "file": "Jeep/Jeep.json.gz",
+  "commands": 711,
+  "signals": 1202
+ },
+ {
+  "make": "Kia",
+  "model": "Cadenza",
+  "file": "Kia/Cadenza.json.gz",
+  "commands": 51,
+  "signals": 281
+ },
+ {
+  "make": "Kia",
+  "model": "Carens",
+  "file": "Kia/Carens.json.gz",
+  "commands": 81,
+  "signals": 378
+ },
+ {
+  "make": "Kia",
+  "model": "Carnival",
+  "file": "Kia/Carnival.json.gz",
+  "commands": 100,
+  "signals": 684
+ },
+ {
+  "make": "Kia",
+  "model": "Ceed",
+  "file": "Kia/Ceed.json.gz",
+  "commands": 96,
+  "signals": 454
+ },
+ {
+  "make": "Kia",
+  "model": "Cerato",
+  "file": "Kia/Cerato.json.gz",
+  "commands": 91,
+  "signals": 419
+ },
+ {
+  "make": "Kia",
+  "model": "EV3",
+  "file": "Kia/EV3.json.gz",
+  "commands": 50,
+  "signals": 459
+ },
+ {
+  "make": "Kia",
+  "model": "EV6",
+  "file": "Kia/EV6.json.gz",
+  "commands": 39,
+  "signals": 402
+ },
+ {
+  "make": "Kia",
+  "model": "EV9",
+  "file": "Kia/EV9.json.gz",
+  "commands": 37,
+  "signals": 318
+ },
+ {
+  "make": "Kia",
+  "model": "Forte",
+  "file": "Kia/Forte.json.gz",
+  "commands": 72,
+  "signals": 360
+ },
+ {
+  "make": "Kia",
+  "model": "K4",
+  "file": "Kia/K4.json.gz",
+  "commands": 72,
+  "signals": 378
+ },
+ {
+  "make": "Kia",
+  "model": "K5",
+  "file": "Kia/K5.json.gz",
+  "commands": 71,
+  "signals": 348
+ },
+ {
+  "make": "Kia",
+  "model": "Niro EV",
+  "file": "Kia/Niro-EV.json.gz",
+  "commands": 64,
+  "signals": 627
+ },
+ {
+  "make": "Kia",
+  "model": "Niro",
+  "file": "Kia/Niro.json.gz",
+  "commands": 117,
+  "signals": 946
+ },
+ {
+  "make": "Kia",
+  "model": "Optima",
+  "file": "Kia/Optima.json.gz",
+  "commands": 71,
+  "signals": 358
+ },
+ {
+  "make": "Kia",
+  "model": "Picanto",
+  "file": "Kia/Picanto.json.gz",
+  "commands": 87,
+  "signals": 433
+ },
+ {
+  "make": "Kia",
+  "model": "Rio",
+  "file": "Kia/Rio.json.gz",
+  "commands": 79,
+  "signals": 390
+ },
+ {
+  "make": "Kia",
+  "model": "Seltos",
+  "file": "Kia/Seltos.json.gz",
+  "commands": 92,
+  "signals": 431
+ },
+ {
+  "make": "Kia",
+  "model": "Sorento",
+  "file": "Kia/Sorento.json.gz",
+  "commands": 101,
+  "signals": 695
+ },
+ {
+  "make": "Kia",
+  "model": "Soul EV",
+  "file": "Kia/Soul-EV.json.gz",
+  "commands": 34,
+  "signals": 258
+ },
+ {
+  "make": "Kia",
+  "model": "Soul",
+  "file": "Kia/Soul.json.gz",
+  "commands": 72,
+  "signals": 344
+ },
+ {
+  "make": "Kia",
+  "model": "Sportage HEV",
+  "file": "Kia/Sportage-HEV.json.gz",
+  "commands": 3,
+  "signals": 3
+ },
+ {
+  "make": "Kia",
+  "model": "Sportage",
+  "file": "Kia/Sportage.json.gz",
+  "commands": 120,
+  "signals": 883
+ },
+ {
+  "make": "Kia",
+  "model": "Stinger",
+  "file": "Kia/Stinger.json.gz",
+  "commands": 66,
+  "signals": 304
+ },
+ {
+  "make": "Kia",
+  "model": "Stonic",
+  "file": "Kia/Stonic.json.gz",
+  "commands": 78,
+  "signals": 381
+ },
+ {
+  "make": "Kia",
+  "model": "Tasman",
+  "file": "Kia/Tasman.json.gz",
+  "commands": 50,
+  "signals": 253
+ },
+ {
+  "make": "Kia",
+  "model": "Telluride",
+  "file": "Kia/Telluride.json.gz",
+  "commands": 26,
+  "signals": 101
+ },
+ {
+  "make": "Kia",
+  "model": "XCeed",
+  "file": "Kia/XCeed.json.gz",
+  "commands": 68,
+  "signals": 323
+ },
+ {
+  "make": "Kia",
+  "model": "Kia",
+  "file": "Kia/Kia.json.gz",
+  "commands": 147,
+  "signals": 1435
+ },
+ {
+  "make": "Lamborghini",
+  "model": "Lamborghini",
+  "file": "Lamborghini/Lamborghini.json.gz",
+  "commands": 1975,
+  "signals": 3015
+ },
+ {
+  "make": "Land Rover",
+  "model": "Defender",
+  "file": "Land-Rover/Defender.json.gz",
+  "commands": 71,
+  "signals": 74
+ },
+ {
+  "make": "Land Rover",
+  "model": "Discovery",
+  "file": "Land-Rover/Discovery.json.gz",
+  "commands": 68,
+  "signals": 68
+ },
+ {
+  "make": "Land Rover",
+  "model": "LR4",
+  "file": "Land-Rover/LR4.json.gz",
+  "commands": 100,
+  "signals": 108
+ },
+ {
+  "make": "Land Rover",
+  "model": "Range Rover Evoque",
+  "file": "Land-Rover/Range-Rover-Evoque.json.gz",
+  "commands": 164,
+  "signals": 193
+ },
+ {
+  "make": "Land Rover",
+  "model": "Range Rover",
+  "file": "Land-Rover/Range-Rover.json.gz",
+  "commands": 120,
+  "signals": 128
+ },
+ {
+  "make": "Land Rover",
+  "model": "Land Rover",
+  "file": "Land-Rover/Land-Rover.json.gz",
+  "commands": 171,
+  "signals": 214
+ },
+ {
+  "make": "Lexus",
+  "model": "ES",
+  "file": "Lexus/ES.json.gz",
+  "commands": 134,
+  "signals": 225
+ },
+ {
+  "make": "Lexus",
+  "model": "GX",
+  "file": "Lexus/GX.json.gz",
+  "commands": 265,
+  "signals": 581
+ },
+ {
+  "make": "Lexus",
+  "model": "IS",
+  "file": "Lexus/IS.json.gz",
+  "commands": 195,
+  "signals": 496
+ },
+ {
+  "make": "Lexus",
+  "model": "LS 600h L",
+  "file": "Lexus/LS-600h-L.json.gz",
+  "commands": 80,
+  "signals": 227
+ },
+ {
+  "make": "Lexus",
+  "model": "NX 350h",
+  "file": "Lexus/NX-350h.json.gz",
+  "commands": 96,
+  "signals": 260
+ },
+ {
+  "make": "Lexus",
+  "model": "NX",
+  "file": "Lexus/NX.json.gz",
+  "commands": 112,
+  "signals": 284
+ },
+ {
+  "make": "Lexus",
+  "model": "RC",
+  "file": "Lexus/RC.json.gz",
+  "commands": 177,
+  "signals": 460
+ },
+ {
+  "make": "Lexus",
+  "model": "RX",
+  "file": "Lexus/RX.json.gz",
+  "commands": 112,
+  "signals": 357
+ },
+ {
+  "make": "Lexus",
+  "model": "UX",
+  "file": "Lexus/UX.json.gz",
+  "commands": 264,
+  "signals": 717
+ },
+ {
+  "make": "Lexus",
+  "model": "Lexus",
+  "file": "Lexus/Lexus.json.gz",
+  "commands": 578,
+  "signals": 1573
+ },
+ {
+  "make": "Lincoln",
+  "model": "MKC",
+  "file": "Lincoln/MKC.json.gz",
+  "commands": 100,
+  "signals": 100
+ },
+ {
+  "make": "Lincoln",
+  "model": "Nautilus",
+  "file": "Lincoln/Nautilus.json.gz",
+  "commands": 124,
+  "signals": 128
+ },
+ {
+  "make": "Lincoln",
+  "model": "Navigator",
+  "file": "Lincoln/Navigator.json.gz",
+  "commands": 292,
+  "signals": 309
+ },
+ {
+  "make": "Lincoln",
+  "model": "Town Car",
+  "file": "Lincoln/Town-Car.json.gz",
+  "commands": 5,
+  "signals": 5
+ },
+ {
+  "make": "Lincoln",
+  "model": "Lincoln",
+  "file": "Lincoln/Lincoln.json.gz",
+  "commands": 419,
+  "signals": 531
+ },
+ {
+  "make": "Lotus",
+  "model": "Lotus",
+  "file": "Lotus/Lotus.json.gz",
+  "commands": 505,
+  "signals": 801
+ },
+ {
+  "make": "MG",
+  "model": "EHS",
+  "file": "MG/EHS.json.gz",
+  "commands": 53,
+  "signals": 138
+ },
+ {
+  "make": "MG",
+  "model": "HS",
+  "file": "MG/HS.json.gz",
+  "commands": 76,
+  "signals": 138
+ },
+ {
+  "make": "MG",
+  "model": "MG4",
+  "file": "MG/MG4.json.gz",
+  "commands": 39,
+  "signals": 111
+ },
+ {
+  "make": "MG",
+  "model": "MG5",
+  "file": "MG/MG5.json.gz",
+  "commands": 48,
+  "signals": 120
+ },
+ {
+  "make": "MG",
+  "model": "One",
+  "file": "MG/One.json.gz",
+  "commands": 12,
+  "signals": 12
+ },
+ {
+  "make": "MG",
+  "model": "RX9",
+  "file": "MG/RX9.json.gz",
+  "commands": 10,
+  "signals": 10
+ },
+ {
+  "make": "MG",
+  "model": "ZS EV",
+  "file": "MG/ZS-EV.json.gz",
+  "commands": 98,
+  "signals": 189
+ },
+ {
+  "make": "MG",
+  "model": "ZS",
+  "file": "MG/ZS.json.gz",
+  "commands": 62,
+  "signals": 144
+ },
+ {
+  "make": "MG",
+  "model": "MG",
+  "file": "MG/MG.json.gz",
+  "commands": 145,
+  "signals": 327
+ },
+ {
+  "make": "MINI",
+  "model": "Clubman",
+  "file": "MINI/Clubman.json.gz",
+  "commands": 96,
+  "signals": 204
+ },
+ {
+  "make": "MINI",
+  "model": "Cooper SE",
+  "file": "MINI/Cooper-SE.json.gz",
+  "commands": 7,
+  "signals": 12
+ },
+ {
+  "make": "MINI",
+  "model": "Cooper",
+  "file": "MINI/Cooper.json.gz",
+  "commands": 116,
+  "signals": 241
+ },
+ {
+  "make": "MINI",
+  "model": "Countryman",
+  "file": "MINI/Countryman.json.gz",
+  "commands": 115,
+  "signals": 240
+ },
+ {
+  "make": "MINI",
+  "model": "Hardtop",
+  "file": "MINI/Hardtop.json.gz",
+  "commands": 102,
+  "signals": 213
+ },
+ {
+  "make": "MINI",
+  "model": "MINI",
+  "file": "MINI/MINI.json.gz",
+  "commands": 116,
+  "signals": 272
+ },
+ {
+  "make": "Maserati",
+  "model": "Maserati",
+  "file": "Maserati/Maserati.json.gz",
+  "commands": 711,
+  "signals": 1202
+ },
+ {
+  "make": "Mazda",
+  "model": "2",
+  "file": "Mazda/2.json.gz",
+  "commands": 137,
+  "signals": 171
+ },
+ {
+  "make": "Mazda",
+  "model": "3",
+  "file": "Mazda/3.json.gz",
+  "commands": 230,
+  "signals": 289
+ },
+ {
+  "make": "Mazda",
+  "model": "5",
+  "file": "Mazda/5.json.gz",
+  "commands": 297,
+  "signals": 366
+ },
+ {
+  "make": "Mazda",
+  "model": "6",
+  "file": "Mazda/6.json.gz",
+  "commands": 276,
+  "signals": 317
+ },
+ {
+  "make": "Mazda",
+  "model": "B Series Pickup",
+  "file": "Mazda/B-Series-Pickup.json.gz",
+  "commands": 136,
+  "signals": 149
+ },
+ {
+  "make": "Mazda",
+  "model": "BT50",
+  "file": "Mazda/BT50.json.gz",
+  "commands": 19,
+  "signals": 19
+ },
+ {
+  "make": "Mazda",
+  "model": "CX 3",
+  "file": "Mazda/CX-3.json.gz",
+  "commands": 22,
+  "signals": 22
+ },
+ {
+  "make": "Mazda",
+  "model": "CX 30",
+  "file": "Mazda/CX-30.json.gz",
+  "commands": 262,
+  "signals": 293
+ },
+ {
+  "make": "Mazda",
+  "model": "CX 5",
+  "file": "Mazda/CX-5.json.gz",
+  "commands": 278,
+  "signals": 319
+ },
+ {
+  "make": "Mazda",
+  "model": "CX 50",
+  "file": "Mazda/CX-50.json.gz",
+  "commands": 87,
+  "signals": 221
+ },
+ {
+  "make": "Mazda",
+  "model": "CX 60",
+  "file": "Mazda/CX-60.json.gz",
+  "commands": 118,
+  "signals": 134
+ },
+ {
+  "make": "Mazda",
+  "model": "CX 9",
+  "file": "Mazda/CX-9.json.gz",
+  "commands": 22,
+  "signals": 22
+ },
+ {
+  "make": "Mazda",
+  "model": "CX 90",
+  "file": "Mazda/CX-90.json.gz",
+  "commands": 13,
+  "signals": 13
+ },
+ {
+  "make": "Mazda",
+  "model": "MX 30",
+  "file": "Mazda/MX-30.json.gz",
+  "commands": 75,
+  "signals": 90
+ },
+ {
+  "make": "Mazda",
+  "model": "MX 5",
+  "file": "Mazda/MX-5.json.gz",
+  "commands": 74,
+  "signals": 91
+ },
+ {
+  "make": "Mazda",
+  "model": "Mazdaspeed 3",
+  "file": "Mazda/Mazdaspeed-3.json.gz",
+  "commands": 114,
+  "signals": 131
+ },
+ {
+  "make": "Mazda",
+  "model": "Mazdaspeed MX 5",
+  "file": "Mazda/Mazdaspeed-MX-5.json.gz",
+  "commands": 205,
+  "signals": 242
+ },
+ {
+  "make": "Mazda",
+  "model": "Tribute",
+  "file": "Mazda/Tribute.json.gz",
+  "commands": 92,
+  "signals": 95
+ },
+ {
+  "make": "Mazda",
+  "model": "Mazda",
+  "file": "Mazda/Mazda.json.gz",
+  "commands": 950,
+  "signals": 1374
+ },
+ {
+  "make": "Mercedes Benz",
+  "model": "B Class",
+  "file": "Mercedes-Benz/B-Class.json.gz",
+  "commands": 12,
+  "signals": 16
+ },
+ {
+  "make": "Mercedes Benz",
+  "model": "C Class",
+  "file": "Mercedes-Benz/C-Class.json.gz",
+  "commands": 14,
+  "signals": 26
+ },
+ {
+  "make": "Mercedes Benz",
+  "model": "CL Class",
+  "file": "Mercedes-Benz/CL-Class.json.gz",
+  "commands": 12,
+  "signals": 16
+ },
+ {
+  "make": "Mercedes Benz",
+  "model": "CLK Class",
+  "file": "Mercedes-Benz/CLK-Class.json.gz",
+  "commands": 14,
+  "signals": 26
+ },
+ {
+  "make": "Mercedes Benz",
+  "model": "EQA",
+  "file": "Mercedes-Benz/EQA.json.gz",
+  "commands": 11,
+  "signals": 19
+ },
+ {
+  "make": "Mercedes Benz",
+  "model": "EQB",
+  "file": "Mercedes-Benz/EQB.json.gz",
+  "commands": 37,
+  "signals": 55
+ },
+ {
+  "make": "Mercedes Benz",
+  "model": "EQV",
+  "file": "Mercedes-Benz/EQV.json.gz",
+  "commands": 20,
+  "signals": 20
+ },
+ {
+  "make": "Mercedes Benz",
+  "model": "G Class",
+  "file": "Mercedes-Benz/G-Class.json.gz",
+  "commands": 2,
+  "signals": 10
+ },
+ {
+  "make": "Mercedes Benz",
+  "model": "GLA Class",
+  "file": "Mercedes-Benz/GLA-Class.json.gz",
+  "commands": 12,
+  "signals": 16
+ },
+ {
+  "make": "Mercedes Benz",
+  "model": "GLC Class",
+  "file": "Mercedes-Benz/GLC-Class.json.gz",
+  "commands": 14,
+  "signals": 26
+ },
+ {
+  "make": "Mercedes Benz",
+  "model": "GLK Class",
+  "file": "Mercedes-Benz/GLK-Class.json.gz",
+  "commands": 12,
+  "signals": 16
+ },
+ {
+  "make": "Mercedes Benz",
+  "model": "M Class",
+  "file": "Mercedes-Benz/M-Class.json.gz",
+  "commands": 12,
+  "signals": 16
+ },
+ {
+  "make": "Mercedes Benz",
+  "model": "ML 350",
+  "file": "Mercedes-Benz/ML-350.json.gz",
+  "commands": 12,
+  "signals": 16
+ },
+ {
+  "make": "Mercedes Benz",
+  "model": "SL Class",
+  "file": "Mercedes-Benz/SL-Class.json.gz",
+  "commands": 12,
+  "signals": 16
+ },
+ {
+  "make": "Mercedes Benz",
+  "model": "SLC Class",
+  "file": "Mercedes-Benz/SLC-Class.json.gz",
+  "commands": 12,
+  "signals": 16
+ },
+ {
+  "make": "Mercedes Benz",
+  "model": "SLK Class",
+  "file": "Mercedes-Benz/SLK-Class.json.gz",
+  "commands": 12,
+  "signals": 16
+ },
+ {
+  "make": "Mercedes Benz",
+  "model": "Viano",
+  "file": "Mercedes-Benz/Viano.json.gz",
+  "commands": 12,
+  "signals": 16
+ },
+ {
+  "make": "Mercedes Benz",
+  "model": "Mercedes Benz",
+  "file": "Mercedes-Benz/Mercedes-Benz.json.gz",
+  "commands": 11,
+  "signals": 27
+ },
+ {
+  "make": "Mitsubishi",
+  "model": "ASX",
+  "file": "Mitsubishi/ASX.json.gz",
+  "commands": 64,
+  "signals": 161
+ },
+ {
+  "make": "Mitsubishi",
+  "model": "Eclipse Cross",
+  "file": "Mitsubishi/Eclipse-Cross.json.gz",
+  "commands": 114,
+  "signals": 264
+ },
+ {
+  "make": "Mitsubishi",
+  "model": "Outlander PHEV",
+  "file": "Mitsubishi/Outlander-PHEV.json.gz",
+  "commands": 96,
+  "signals": 320
+ },
+ {
+  "make": "Mitsubishi",
+  "model": "Outlander Sport",
+  "file": "Mitsubishi/Outlander-Sport.json.gz",
+  "commands": 47,
+  "signals": 141
+ },
+ {
+  "make": "Mitsubishi",
+  "model": "Outlander",
+  "file": "Mitsubishi/Outlander.json.gz",
+  "commands": 105,
+  "signals": 228
+ },
+ {
+  "make": "Mitsubishi",
+  "model": "RVR",
+  "file": "Mitsubishi/RVR.json.gz",
+  "commands": 64,
+  "signals": 161
+ },
+ {
+  "make": "Mitsubishi",
+  "model": "Triton",
+  "file": "Mitsubishi/Triton.json.gz",
+  "commands": 89,
+  "signals": 218
+ },
+ {
+  "make": "Mitsubishi",
+  "model": "Mitsubishi",
+  "file": "Mitsubishi/Mitsubishi.json.gz",
+  "commands": 180,
+  "signals": 510
+ },
+ {
+  "make": "Nissan",
+  "model": "350Z",
+  "file": "Nissan/350Z.json.gz",
+  "commands": 24,
+  "signals": 33
+ },
+ {
+  "make": "Nissan",
+  "model": "370Z",
+  "file": "Nissan/370Z.json.gz",
+  "commands": 26,
+  "signals": 35
+ },
+ {
+  "make": "Nissan",
+  "model": "ARIYA",
+  "file": "Nissan/ARIYA.json.gz",
+  "commands": 163,
+  "signals": 395
+ },
+ {
+  "make": "Nissan",
+  "model": "Altima",
+  "file": "Nissan/Altima.json.gz",
+  "commands": 30,
+  "signals": 40
+ },
+ {
+  "make": "Nissan",
+  "model": "Armada",
+  "file": "Nissan/Armada.json.gz",
+  "commands": 36,
+  "signals": 53
+ },
+ {
+  "make": "Nissan",
+  "model": "Frontier",
+  "file": "Nissan/Frontier.json.gz",
+  "commands": 27,
+  "signals": 44
+ },
+ {
+  "make": "Nissan",
+  "model": "Leaf",
+  "file": "Nissan/Leaf.json.gz",
+  "commands": 43,
+  "signals": 155
+ },
+ {
+  "make": "Nissan",
+  "model": "Maxima",
+  "file": "Nissan/Maxima.json.gz",
+  "commands": 111,
+  "signals": 140
+ },
+ {
+  "make": "Nissan",
+  "model": "Micra",
+  "file": "Nissan/Micra.json.gz",
+  "commands": 14,
+  "signals": 16
+ },
+ {
+  "make": "Nissan",
+  "model": "Murano",
+  "file": "Nissan/Murano.json.gz",
+  "commands": 115,
+  "signals": 145
+ },
+ {
+  "make": "Nissan",
+  "model": "NV Passenger",
+  "file": "Nissan/NV-Passenger.json.gz",
+  "commands": 17,
+  "signals": 23
+ },
+ {
+  "make": "Nissan",
+  "model": "Pathfinder",
+  "file": "Nissan/Pathfinder.json.gz",
+  "commands": 69,
+  "signals": 78
+ },
+ {
+  "make": "Nissan",
+  "model": "Patrol",
+  "file": "Nissan/Patrol.json.gz",
+  "commands": 8,
+  "signals": 15
+ },
+ {
+  "make": "Nissan",
+  "model": "Pulsar",
+  "file": "Nissan/Pulsar.json.gz",
+  "commands": 10,
+  "signals": 19
+ },
+ {
+  "make": "Nissan",
+  "model": "Qashqai",
+  "file": "Nissan/Qashqai.json.gz",
+  "commands": 289,
+  "signals": 352
+ },
+ {
+  "make": "Nissan",
+  "model": "Rogue Sport",
+  "file": "Nissan/Rogue-Sport.json.gz",
+  "commands": 60,
+  "signals": 63
+ },
+ {
+  "make": "Nissan",
+  "model": "Rogue",
+  "file": "Nissan/Rogue.json.gz",
+  "commands": 135,
+  "signals": 182
+ },
+ {
+  "make": "Nissan",
+  "model": "Sentra",
+  "file": "Nissan/Sentra.json.gz",
+  "commands": 17,
+  "signals": 26
+ },
+ {
+  "make": "Nissan",
+  "model": "Titan XD",
+  "file": "Nissan/Titan-XD.json.gz",
+  "commands": 9,
+  "signals": 14
+ },
+ {
+  "make": "Nissan",
+  "model": "Titan",
+  "file": "Nissan/Titan.json.gz",
+  "commands": 22,
+  "signals": 28
+ },
+ {
+  "make": "Nissan",
+  "model": "X Trail",
+  "file": "Nissan/X-Trail.json.gz",
+  "commands": 110,
+  "signals": 160
+ },
+ {
+  "make": "Nissan",
+  "model": "Xterra",
+  "file": "Nissan/Xterra.json.gz",
+  "commands": 68,
+  "signals": 78
+ },
+ {
+  "make": "Nissan",
+  "model": "Z",
+  "file": "Nissan/Z.json.gz",
+  "commands": 65,
+  "signals": 76
+ },
+ {
+  "make": "Nissan",
+  "model": "Nissan",
+  "file": "Nissan/Nissan.json.gz",
+  "commands": 481,
+  "signals": 888
+ },
+ {
+  "make": "NissanInfiniti",
+  "model": "NissanInfiniti",
+  "file": "NissanInfiniti/NissanInfiniti.json.gz",
+  "commands": 51,
+  "signals": 63
+ },
+ {
+  "make": "Peugeot",
+  "model": "2008",
+  "file": "Peugeot/2008.json.gz",
+  "commands": 360,
+  "signals": 490
+ },
+ {
+  "make": "Peugeot",
+  "model": "207",
+  "file": "Peugeot/207.json.gz",
+  "commands": 295,
+  "signals": 301
+ },
+ {
+  "make": "Peugeot",
+  "model": "208",
+  "file": "Peugeot/208.json.gz",
+  "commands": 324,
+  "signals": 449
+ },
+ {
+  "make": "Peugeot",
+  "model": "3008",
+  "file": "Peugeot/3008.json.gz",
+  "commands": 360,
+  "signals": 490
+ },
+ {
+  "make": "Peugeot",
+  "model": "308",
+  "file": "Peugeot/308.json.gz",
+  "commands": 280,
+  "signals": 291
+ },
+ {
+  "make": "Peugeot",
+  "model": "408",
+  "file": "Peugeot/408.json.gz",
+  "commands": 275,
+  "signals": 286
+ },
+ {
+  "make": "Peugeot",
+  "model": "5008",
+  "file": "Peugeot/5008.json.gz",
+  "commands": 359,
+  "signals": 489
+ },
+ {
+  "make": "Peugeot",
+  "model": "508",
+  "file": "Peugeot/508.json.gz",
+  "commands": 352,
+  "signals": 363
+ },
+ {
+  "make": "Peugeot",
+  "model": "Partner",
+  "file": "Peugeot/Partner.json.gz",
+  "commands": 275,
+  "signals": 286
+ },
+ {
+  "make": "Peugeot",
+  "model": "RCZ",
+  "file": "Peugeot/RCZ.json.gz",
+  "commands": 275,
+  "signals": 286
+ },
+ {
+  "make": "Peugeot",
+  "model": "Peugeot",
+  "file": "Peugeot/Peugeot.json.gz",
+  "commands": 711,
+  "signals": 1202
+ },
+ {
+  "make": "Polestar",
+  "model": "2",
+  "file": "Polestar/2.json.gz",
+  "commands": 94,
+  "signals": 109
+ },
+ {
+  "make": "Polestar",
+  "model": "4",
+  "file": "Polestar/4.json.gz",
+  "commands": 1,
+  "signals": 1
+ },
+ {
+  "make": "Polestar",
+  "model": "Polestar",
+  "file": "Polestar/Polestar.json.gz",
+  "commands": 505,
+  "signals": 801
+ },
+ {
+  "make": "Porsche",
+  "model": "718",
+  "file": "Porsche/718.json.gz",
+  "commands": 539,
+  "signals": 589
+ },
+ {
+  "make": "Porsche",
+  "model": "911",
+  "file": "Porsche/911.json.gz",
+  "commands": 465,
+  "signals": 521
+ },
+ {
+  "make": "Porsche",
+  "model": "Cayenne",
+  "file": "Porsche/Cayenne.json.gz",
+  "commands": 28,
+  "signals": 28
+ },
+ {
+  "make": "Porsche",
+  "model": "Cayman",
+  "file": "Porsche/Cayman.json.gz",
+  "commands": 526,
+  "signals": 556
+ },
+ {
+  "make": "Porsche",
+  "model": "Macan Electric",
+  "file": "Porsche/Macan-Electric.json.gz",
+  "commands": 14,
+  "signals": 29
+ },
+ {
+  "make": "Porsche",
+  "model": "Macan",
+  "file": "Porsche/Macan.json.gz",
+  "commands": 1048,
+  "signals": 1112
+ },
+ {
+  "make": "Porsche",
+  "model": "Panamera",
+  "file": "Porsche/Panamera.json.gz",
+  "commands": 588,
+  "signals": 630
+ },
+ {
+  "make": "Porsche",
+  "model": "Taycan",
+  "file": "Porsche/Taycan.json.gz",
+  "commands": 287,
+  "signals": 826
+ },
+ {
+  "make": "Porsche",
+  "model": "Porsche",
+  "file": "Porsche/Porsche.json.gz",
+  "commands": 1975,
+  "signals": 3015
+ },
+ {
+  "make": "Ram",
+  "model": "1500 Classic",
+  "file": "Ram/1500-Classic.json.gz",
+  "commands": 74,
+  "signals": 92
+ },
+ {
+  "make": "Ram",
+  "model": "1500",
+  "file": "Ram/1500.json.gz",
+  "commands": 106,
+  "signals": 131
+ },
+ {
+  "make": "Ram",
+  "model": "2500",
+  "file": "Ram/2500.json.gz",
+  "commands": 213,
+  "signals": 287
+ },
+ {
+  "make": "Ram",
+  "model": "3500",
+  "file": "Ram/3500.json.gz",
+  "commands": 206,
+  "signals": 273
+ },
+ {
+  "make": "Ram",
+  "model": "ProMaster Window Van",
+  "file": "Ram/ProMaster-Window-Van.json.gz",
+  "commands": 35,
+  "signals": 36
+ },
+ {
+  "make": "Ram",
+  "model": "Ram",
+  "file": "Ram/Ram.json.gz",
+  "commands": 711,
+  "signals": 1205
+ },
+ {
+  "make": "Renault",
+  "model": "Captur",
+  "file": "Renault/Captur.json.gz",
+  "commands": 968,
+  "signals": 1496
+ },
+ {
+  "make": "Renault",
+  "model": "Clio",
+  "file": "Renault/Clio.json.gz",
+  "commands": 744,
+  "signals": 1236
+ },
+ {
+  "make": "Renault",
+  "model": "Duster",
+  "file": "Renault/Duster.json.gz",
+  "commands": 109,
+  "signals": 119
+ },
+ {
+  "make": "Renault",
+  "model": "Kadjar",
+  "file": "Renault/Kadjar.json.gz",
+  "commands": 1,
+  "signals": 1
+ },
+ {
+  "make": "Renault",
+  "model": "Laguna",
+  "file": "Renault/Laguna.json.gz",
+  "commands": 108,
+  "signals": 127
+ },
+ {
+  "make": "Renault",
+  "model": "Megane E Tech",
+  "file": "Renault/Megane-E-Tech.json.gz",
+  "commands": 21,
+  "signals": 33
+ },
+ {
+  "make": "Renault",
+  "model": "Megane",
+  "file": "Renault/Megane.json.gz",
+  "commands": 108,
+  "signals": 127
+ },
+ {
+  "make": "Renault",
+  "model": "Scenic",
+  "file": "Renault/Scenic.json.gz",
+  "commands": 316,
+  "signals": 344
+ },
+ {
+  "make": "Renault",
+  "model": "Symbioz",
+  "file": "Renault/Symbioz.json.gz",
+  "commands": 967,
+  "signals": 1495
+ },
+ {
+  "make": "Renault",
+  "model": "Trafic",
+  "file": "Renault/Trafic.json.gz",
+  "commands": 293,
+  "signals": 381
+ },
+ {
+  "make": "Renault",
+  "model": "Twingo",
+  "file": "Renault/Twingo.json.gz",
+  "commands": 295,
+  "signals": 315
+ },
+ {
+  "make": "Renault",
+  "model": "ZOE",
+  "file": "Renault/ZOE.json.gz",
+  "commands": 193,
+  "signals": 298
+ },
+ {
+  "make": "Renault",
+  "model": "Renault",
+  "file": "Renault/Renault.json.gz",
+  "commands": 1280,
+  "signals": 2246
+ },
+ {
+  "make": "Rolls Royce",
+  "model": "Rolls Royce",
+  "file": "Rolls-Royce/Rolls-Royce.json.gz",
+  "commands": 30,
+  "signals": 82
+ },
+ {
+  "make": "SEAT",
+  "model": "SEAT",
+  "file": "SEAT/SEAT.json.gz",
+  "commands": 1975,
+  "signals": 2978
+ },
+ {
+  "make": "Scion",
+  "model": "FR S",
+  "file": "Scion/FR-S.json.gz",
+  "commands": 113,
+  "signals": 127
+ },
+ {
+  "make": "Scion",
+  "model": "iQ",
+  "file": "Scion/iQ.json.gz",
+  "commands": 213,
+  "signals": 541
+ },
+ {
+  "make": "Scion",
+  "model": "tC",
+  "file": "Scion/tC.json.gz",
+  "commands": 214,
+  "signals": 577
+ },
+ {
+  "make": "Scion",
+  "model": "xB",
+  "file": "Scion/xB.json.gz",
+  "commands": 213,
+  "signals": 539
+ },
+ {
+  "make": "Scion",
+  "model": "Scion",
+  "file": "Scion/Scion.json.gz",
+  "commands": 578,
+  "signals": 1531
+ },
+ {
+  "make": "SEAT",
+  "model": "Alhambra",
+  "file": "SEAT/Alhambra.json.gz",
+  "commands": 750,
+  "signals": 768
+ },
+ {
+  "make": "SEAT",
+  "model": "Ateca",
+  "file": "SEAT/Ateca.json.gz",
+  "commands": 1039,
+  "signals": 1112
+ },
+ {
+  "make": "SEAT",
+  "model": "Ibiza",
+  "file": "SEAT/Ibiza.json.gz",
+  "commands": 806,
+  "signals": 839
+ },
+ {
+  "make": "SEAT",
+  "model": "Leon",
+  "file": "SEAT/Leon.json.gz",
+  "commands": 1018,
+  "signals": 1102
+ },
+ {
+  "make": "SEAT",
+  "model": "Mii Electric",
+  "file": "SEAT/Mii-Electric.json.gz",
+  "commands": 242,
+  "signals": 248
+ },
+ {
+  "make": "SEAT",
+  "model": "Mii",
+  "file": "SEAT/Mii.json.gz",
+  "commands": 118,
+  "signals": 124
+ },
+ {
+  "make": "SEAT",
+  "model": "Tarraco",
+  "file": "SEAT/Tarraco.json.gz",
+  "commands": 643,
+  "signals": 659
+ },
+ {
+  "make": "Skoda",
+  "model": "Citigo e iV",
+  "file": "Skoda/Citigo-e-iV.json.gz",
+  "commands": 242,
+  "signals": 248
+ },
+ {
+  "make": "Skoda",
+  "model": "Skoda",
+  "file": "Skoda/Skoda.json.gz",
+  "commands": 1977,
+  "signals": 3017
+ },
+ {
+  "make": "Subaru",
+  "model": "Ascent",
+  "file": "Subaru/Ascent.json.gz",
+  "commands": 176,
+  "signals": 206
+ },
+ {
+  "make": "Subaru",
+  "model": "BRZ",
+  "file": "Subaru/BRZ.json.gz",
+  "commands": 122,
+  "signals": 148
+ },
+ {
+  "make": "Subaru",
+  "model": "Crosstrek",
+  "file": "Subaru/Crosstrek.json.gz",
+  "commands": 161,
+  "signals": 191
+ },
+ {
+  "make": "Subaru",
+  "model": "Forester",
+  "file": "Subaru/Forester.json.gz",
+  "commands": 140,
+  "signals": 162
+ },
+ {
+  "make": "Subaru",
+  "model": "Impreza",
+  "file": "Subaru/Impreza.json.gz",
+  "commands": 209,
+  "signals": 231
+ },
+ {
+  "make": "Subaru",
+  "model": "Legacy",
+  "file": "Subaru/Legacy.json.gz",
+  "commands": 181,
+  "signals": 211
+ },
+ {
+  "make": "Subaru",
+  "model": "Outback",
+  "file": "Subaru/Outback.json.gz",
+  "commands": 170,
+  "signals": 192
+ },
+ {
+  "make": "Subaru",
+  "model": "Solterra",
+  "file": "Subaru/Solterra.json.gz",
+  "commands": 71,
+  "signals": 101
+ },
+ {
+  "make": "Subaru",
+  "model": "Tribeca",
+  "file": "Subaru/Tribeca.json.gz",
+  "commands": 56,
+  "signals": 70
+ },
+ {
+  "make": "Subaru",
+  "model": "WRX",
+  "file": "Subaru/WRX.json.gz",
+  "commands": 184,
+  "signals": 226
+ },
+ {
+  "make": "Subaru",
+  "model": "Subaru",
+  "file": "Subaru/Subaru.json.gz",
+  "commands": 297,
+  "signals": 372
+ },
+ {
+  "make": "Suzuki",
+  "model": "Baleno",
+  "file": "Suzuki/Baleno.json.gz",
+  "commands": 14,
+  "signals": 128
+ },
+ {
+  "make": "Suzuki",
+  "model": "Jimny",
+  "file": "Suzuki/Jimny.json.gz",
+  "commands": 14,
+  "signals": 128
+ },
+ {
+  "make": "Suzuki",
+  "model": "Splash",
+  "file": "Suzuki/Splash.json.gz",
+  "commands": 15,
+  "signals": 153
+ },
+ {
+  "make": "Suzuki",
+  "model": "Swift",
+  "file": "Suzuki/Swift.json.gz",
+  "commands": 4,
+  "signals": 41
+ },
+ {
+  "make": "Suzuki",
+  "model": "Vitara",
+  "file": "Suzuki/Vitara.json.gz",
+  "commands": 14,
+  "signals": 128
+ },
+ {
+  "make": "Suzuki",
+  "model": "XL7",
+  "file": "Suzuki/XL7.json.gz",
+  "commands": 14,
+  "signals": 128
+ },
+ {
+  "make": "Suzuki",
+  "model": "Suzuki",
+  "file": "Suzuki/Suzuki.json.gz",
+  "commands": 529,
+  "signals": 1465
+ },
+ {
+  "make": "Tata",
+  "model": "Tata",
+  "file": "Tata/Tata.json.gz",
+  "commands": 171,
+  "signals": 214
+ },
+ {
+  "make": "Toyota",
+  "model": "4Runner",
+  "file": "Toyota/4Runner.json.gz",
+  "commands": 168,
+  "signals": 413
+ },
+ {
+  "make": "Toyota",
+  "model": "Allion",
+  "file": "Toyota/Allion.json.gz",
+  "commands": 77,
+  "signals": 203
+ },
+ {
+  "make": "Toyota",
+  "model": "Aqua",
+  "file": "Toyota/Aqua.json.gz",
+  "commands": 143,
+  "signals": 634
+ },
+ {
+  "make": "Toyota",
+  "model": "Auris",
+  "file": "Toyota/Auris.json.gz",
+  "commands": 112,
+  "signals": 366
+ },
+ {
+  "make": "Toyota",
+  "model": "Avalon Hybrid",
+  "file": "Toyota/Avalon-Hybrid.json.gz",
+  "commands": 185,
+  "signals": 688
+ },
+ {
+  "make": "Toyota",
+  "model": "Avalon",
+  "file": "Toyota/Avalon.json.gz",
+  "commands": 152,
+  "signals": 295
+ },
+ {
+  "make": "Toyota",
+  "model": "Aygo",
+  "file": "Toyota/Aygo.json.gz",
+  "commands": 91,
+  "signals": 320
+ },
+ {
+  "make": "Toyota",
+  "model": "C HR",
+  "file": "Toyota/C-HR.json.gz",
+  "commands": 241,
+  "signals": 679
+ },
+ {
+  "make": "Toyota",
+  "model": "Camry Hybrid",
+  "file": "Toyota/Camry-Hybrid.json.gz",
+  "commands": 285,
+  "signals": 881
+ },
+ {
+  "make": "Toyota",
+  "model": "Camry",
+  "file": "Toyota/Camry.json.gz",
+  "commands": 214,
+  "signals": 579
+ },
+ {
+  "make": "Toyota",
+  "model": "Corolla Cross",
+  "file": "Toyota/Corolla-Cross.json.gz",
+  "commands": 197,
+  "signals": 468
+ },
+ {
+  "make": "Toyota",
+  "model": "Corolla Hybrid",
+  "file": "Toyota/Corolla-Hybrid.json.gz",
+  "commands": 114,
+  "signals": 333
+ },
+ {
+  "make": "Toyota",
+  "model": "Corolla",
+  "file": "Toyota/Corolla.json.gz",
+  "commands": 288,
+  "signals": 996
+ },
+ {
+  "make": "Toyota",
+  "model": "Crown",
+  "file": "Toyota/Crown.json.gz",
+  "commands": 250,
+  "signals": 653
+ },
+ {
+  "make": "Toyota",
+  "model": "FJ Cruiser",
+  "file": "Toyota/FJ-Cruiser.json.gz",
+  "commands": 86,
+  "signals": 314
+ },
+ {
+  "make": "Toyota",
+  "model": "GR Corolla",
+  "file": "Toyota/GR-Corolla.json.gz",
+  "commands": 159,
+  "signals": 310
+ },
+ {
+  "make": "Toyota",
+  "model": "GR Supra",
+  "file": "Toyota/GR-Supra.json.gz",
+  "commands": 50,
+  "signals": 89
+ },
+ {
+  "make": "Toyota",
+  "model": "GR86",
+  "file": "Toyota/GR86.json.gz",
+  "commands": 122,
+  "signals": 148
+ },
+ {
+  "make": "Toyota",
+  "model": "GT86",
+  "file": "Toyota/GT86.json.gz",
+  "commands": 105,
+  "signals": 113
+ },
+ {
+  "make": "Toyota",
+  "model": "Grand Highlander Hybrid",
+  "file": "Toyota/Grand-Highlander-Hybrid.json.gz",
+  "commands": 175,
+  "signals": 333
+ },
+ {
+  "make": "Toyota",
+  "model": "Grand Highlander",
+  "file": "Toyota/Grand-Highlander.json.gz",
+  "commands": 266,
+  "signals": 604
+ },
+ {
+  "make": "Toyota",
+  "model": "Hiace",
+  "file": "Toyota/Hiace.json.gz",
+  "commands": 72,
+  "signals": 276
+ },
+ {
+  "make": "Toyota",
+  "model": "Highlander",
+  "file": "Toyota/Highlander.json.gz",
+  "commands": 248,
+  "signals": 586
+ },
+ {
+  "make": "Toyota",
+  "model": "Hilux",
+  "file": "Toyota/Hilux.json.gz",
+  "commands": 193,
+  "signals": 509
+ },
+ {
+  "make": "Toyota",
+  "model": "Land Cruiser Hybrid",
+  "file": "Toyota/Land-Cruiser-Hybrid.json.gz",
+  "commands": 285,
+  "signals": 899
+ },
+ {
+  "make": "Toyota",
+  "model": "Land Cruiser",
+  "file": "Toyota/Land-Cruiser.json.gz",
+  "commands": 285,
+  "signals": 899
+ },
+ {
+  "make": "Toyota",
+  "model": "Mirai",
+  "file": "Toyota/Mirai.json.gz",
+  "commands": 55,
+  "signals": 167
+ },
+ {
+  "make": "Toyota",
+  "model": "Prius Prime",
+  "file": "Toyota/Prius-Prime.json.gz",
+  "commands": 217,
+  "signals": 504
+ },
+ {
+  "make": "Toyota",
+  "model": "Prius",
+  "file": "Toyota/Prius.json.gz",
+  "commands": 268,
+  "signals": 822
+ },
+ {
+  "make": "Toyota",
+  "model": "RAV4 Hybrid",
+  "file": "Toyota/RAV4-Hybrid.json.gz",
+  "commands": 292,
+  "signals": 1014
+ },
+ {
+  "make": "Toyota",
+  "model": "RAV4 Prime",
+  "file": "Toyota/RAV4-Prime.json.gz",
+  "commands": 185,
+  "signals": 419
+ },
+ {
+  "make": "Toyota",
+  "model": "RAV4",
+  "file": "Toyota/RAV4.json.gz",
+  "commands": 210,
+  "signals": 594
+ },
+ {
+  "make": "Toyota",
+  "model": "Sequoia",
+  "file": "Toyota/Sequoia.json.gz",
+  "commands": 246,
+  "signals": 597
+ },
+ {
+  "make": "Toyota",
+  "model": "Sienna Hybrid",
+  "file": "Toyota/Sienna-Hybrid.json.gz",
+  "commands": 194,
+  "signals": 357
+ },
+ {
+  "make": "Toyota",
+  "model": "Sienna",
+  "file": "Toyota/Sienna.json.gz",
+  "commands": 246,
+  "signals": 597
+ },
+ {
+  "make": "Toyota",
+  "model": "Tacoma",
+  "file": "Toyota/Tacoma.json.gz",
+  "commands": 214,
+  "signals": 570
+ },
+ {
+  "make": "Toyota",
+  "model": "Tundra",
+  "file": "Toyota/Tundra.json.gz",
+  "commands": 265,
+  "signals": 620
+ },
+ {
+  "make": "Toyota",
+  "model": "Veloz",
+  "file": "Toyota/Veloz.json.gz",
+  "commands": 80,
+  "signals": 304
+ },
+ {
+  "make": "Toyota",
+  "model": "Venza Hybrid",
+  "file": "Toyota/Venza-Hybrid.json.gz",
+  "commands": 307,
+  "signals": 1029
+ },
+ {
+  "make": "Toyota",
+  "model": "Venza",
+  "file": "Toyota/Venza.json.gz",
+  "commands": 198,
+  "signals": 471
+ },
+ {
+  "make": "Toyota",
+  "model": "Vios",
+  "file": "Toyota/Vios.json.gz",
+  "commands": 66,
+  "signals": 277
+ },
+ {
+  "make": "Toyota",
+  "model": "Yaris Cross",
+  "file": "Toyota/Yaris-Cross.json.gz",
+  "commands": 255,
+  "signals": 705
+ },
+ {
+  "make": "Toyota",
+  "model": "Yaris iA",
+  "file": "Toyota/Yaris-iA.json.gz",
+  "commands": 68,
+  "signals": 68
+ },
+ {
+  "make": "Toyota",
+  "model": "Yaris",
+  "file": "Toyota/Yaris.json.gz",
+  "commands": 243,
+  "signals": 727
+ },
+ {
+  "make": "Toyota",
+  "model": "bZ4X",
+  "file": "Toyota/bZ4X.json.gz",
+  "commands": 69,
+  "signals": 99
+ },
+ {
+  "make": "Toyota",
+  "model": "Toyota",
+  "file": "Toyota/Toyota.json.gz",
+  "commands": 528,
+  "signals": 1470
+ },
+ {
+  "make": "VauxhallOpel",
+  "model": "Corsa e",
+  "file": "VauxhallOpel/Corsa-e.json.gz",
+  "commands": 9,
+  "signals": 9
+ },
+ {
+  "make": "VauxhallOpel",
+  "model": "VauxhallOpel",
+  "file": "VauxhallOpel/VauxhallOpel.json.gz",
+  "commands": 711,
+  "signals": 1202
+ },
+ {
+  "make": "Volkswagen",
+  "model": "Amarok",
+  "file": "Volkswagen/Amarok.json.gz",
+  "commands": 29,
+  "signals": 29
+ },
+ {
+  "make": "Volkswagen",
+  "model": "Arteon",
+  "file": "Volkswagen/Arteon.json.gz",
+  "commands": 803,
+  "signals": 845
+ },
+ {
+  "make": "Volkswagen",
+  "model": "Atlas",
+  "file": "Volkswagen/Atlas.json.gz",
+  "commands": 433,
+  "signals": 510
+ },
+ {
+  "make": "Volkswagen",
+  "model": "Beetle Convertible",
+  "file": "Volkswagen/Beetle-Convertible.json.gz",
+  "commands": 1059,
+  "signals": 1095
+ },
+ {
+  "make": "Volkswagen",
+  "model": "Beetle",
+  "file": "Volkswagen/Beetle.json.gz",
+  "commands": 1058,
+  "signals": 1094
+ },
+ {
+  "make": "Volkswagen",
+  "model": "CC",
+  "file": "Volkswagen/CC.json.gz",
+  "commands": 815,
+  "signals": 850
+ },
+ {
+  "make": "Volkswagen",
+  "model": "Crafter",
+  "file": "Volkswagen/Crafter.json.gz",
+  "commands": 604,
+  "signals": 613
+ },
+ {
+  "make": "Volkswagen",
+  "model": "Golf",
+  "file": "Volkswagen/Golf.json.gz",
+  "commands": 58,
+  "signals": 84
+ },
+ {
+  "make": "Volkswagen",
+  "model": "ID.4",
+  "file": "Volkswagen/ID.4.json.gz",
+  "commands": 251,
+  "signals": 290
+ },
+ {
+  "make": "Volkswagen",
+  "model": "ID7 Tourer",
+  "file": "Volkswagen/ID7-Tourer.json.gz",
+  "commands": 10,
+  "signals": 31
+ },
+ {
+  "make": "Volkswagen",
+  "model": "Jetta",
+  "file": "Volkswagen/Jetta.json.gz",
+  "commands": 1144,
+  "signals": 1216
+ },
+ {
+  "make": "Volkswagen",
+  "model": "Multivan",
+  "file": "Volkswagen/Multivan.json.gz",
+  "commands": 13,
+  "signals": 16
+ },
+ {
+  "make": "Volkswagen",
+  "model": "Passat",
+  "file": "Volkswagen/Passat.json.gz",
+  "commands": 689,
+  "signals": 730
+ },
+ {
+  "make": "Volkswagen",
+  "model": "Polo",
+  "file": "Volkswagen/Polo.json.gz",
+  "commands": 1101,
+  "signals": 1146
+ },
+ {
+  "make": "Volkswagen",
+  "model": "Scirocco",
+  "file": "Volkswagen/Scirocco.json.gz",
+  "commands": 145,
+  "signals": 148
+ },
+ {
+  "make": "Volkswagen",
+  "model": "T Cross",
+  "file": "Volkswagen/T-Cross.json.gz",
+  "commands": 824,
+  "signals": 903
+ },
+ {
+  "make": "Volkswagen",
+  "model": "T Roc",
+  "file": "Volkswagen/T-Roc.json.gz",
+  "commands": 1237,
+  "signals": 1336
+ },
+ {
+  "make": "Volkswagen",
+  "model": "T6 Transporter",
+  "file": "Volkswagen/T6-Transporter.json.gz",
+  "commands": 416,
+  "signals": 453
+ },
+ {
+  "make": "Volkswagen",
+  "model": "Taigo",
+  "file": "Volkswagen/Taigo.json.gz",
+  "commands": 1052,
+  "signals": 1090
+ },
+ {
+  "make": "Volkswagen",
+  "model": "Taos",
+  "file": "Volkswagen/Taos.json.gz",
+  "commands": 901,
+  "signals": 959
+ },
+ {
+  "make": "Volkswagen",
+  "model": "Tiguan",
+  "file": "Volkswagen/Tiguan.json.gz",
+  "commands": 960,
+  "signals": 1003
+ },
+ {
+  "make": "Volkswagen",
+  "model": "Touareg",
+  "file": "Volkswagen/Touareg.json.gz",
+  "commands": 526,
+  "signals": 562
+ },
+ {
+  "make": "Volkswagen",
+  "model": "Touran",
+  "file": "Volkswagen/Touran.json.gz",
+  "commands": 862,
+  "signals": 905
+ },
+ {
+  "make": "Volkswagen",
+  "model": "Transporter",
+  "file": "Volkswagen/Transporter.json.gz",
+  "commands": 520,
+  "signals": 556
+ },
+ {
+  "make": "Volkswagen",
+  "model": "Up",
+  "file": "Volkswagen/Up.json.gz",
+  "commands": 583,
+  "signals": 608
+ },
+ {
+  "make": "Volkswagen",
+  "model": "Virtus",
+  "file": "Volkswagen/Virtus.json.gz",
+  "commands": 1106,
+  "signals": 1173
+ },
+ {
+  "make": "Volkswagen",
+  "model": "e Golf",
+  "file": "Volkswagen/e-Golf.json.gz",
+  "commands": 280,
+  "signals": 312
+ },
+ {
+  "make": "Volkswagen",
+  "model": "e Up",
+  "file": "Volkswagen/e-Up.json.gz",
+  "commands": 242,
+  "signals": 248
+ },
+ {
+  "make": "Volkswagen",
+  "model": "Volkswagen",
+  "file": "Volkswagen/Volkswagen.json.gz",
+  "commands": 1975,
+  "signals": 2976
+ },
+ {
+  "make": "Volvo",
+  "model": "S40",
+  "file": "Volvo/S40.json.gz",
+  "commands": 4,
+  "signals": 4
+ },
+ {
+  "make": "Volvo",
+  "model": "S60",
+  "file": "Volvo/S60.json.gz",
+  "commands": 62,
+  "signals": 69
+ },
+ {
+  "make": "Volvo",
+  "model": "S80",
+  "file": "Volvo/S80.json.gz",
+  "commands": 119,
+  "signals": 127
+ },
+ {
+  "make": "Volvo",
+  "model": "S90",
+  "file": "Volvo/S90.json.gz",
+  "commands": 194,
+  "signals": 210
+ },
+ {
+  "make": "Volvo",
+  "model": "V40",
+  "file": "Volvo/V40.json.gz",
+  "commands": 284,
+  "signals": 308
+ },
+ {
+  "make": "Volvo",
+  "model": "V60",
+  "file": "Volvo/V60.json.gz",
+  "commands": 279,
+  "signals": 307
+ },
+ {
+  "make": "Volvo",
+  "model": "XC40 Recharge",
+  "file": "Volvo/XC40-Recharge.json.gz",
+  "commands": 2,
+  "signals": 2
+ },
+ {
+  "make": "Volvo",
+  "model": "XC40",
+  "file": "Volvo/XC40.json.gz",
+  "commands": 79,
+  "signals": 88
+ },
+ {
+  "make": "Volvo",
+  "model": "XC60",
+  "file": "Volvo/XC60.json.gz",
+  "commands": 364,
+  "signals": 398
+ },
+ {
+  "make": "Volvo",
+  "model": "XC90",
+  "file": "Volvo/XC90.json.gz",
+  "commands": 185,
+  "signals": 200
+ },
+ {
+  "make": "Volvo",
+  "model": "Volvo",
+  "file": "Volvo/Volvo.json.gz",
+  "commands": 505,
+  "signals": 801
+ },
+ {
+  "make": "smart",
+  "model": "fortwo",
+  "file": "smart/fortwo.json.gz",
+  "commands": 80,
+  "signals": 329
+ },
+ {
+  "make": "smart",
+  "model": "smart",
+  "file": "smart/smart.json.gz",
+  "commands": 120,
+  "signals": 402
+ }
+]
