@@ -26,7 +26,17 @@ export function ToolsSheet({ visible, onClose, m }: { visible: boolean; onClose:
       button: "Detect",
       run: () => void m.sendCommand("detect_protocol", { protocol: "auto" }),
       busy: m.probeStage !== null,
-      result: m.probeStage ?? (m.protocolInfo ? (m.protocolInfo.ok ? m.protocolInfo.protocol : `not found (${m.protocolInfo.reason ?? "?"})`) : null),
+      result:
+        m.probeStage ??
+        (m.protocolInfo
+          ? m.protocolInfo.ok
+            ? m.protocolInfo.protocol
+            : `not found (${m.protocolInfo.reason ?? "?"})${
+                m.protocolInfo.probe
+                  ? ` · tx_error ${m.protocolInfo.probe.tx_error}, tx_failed ${m.protocolInfo.probe.tx_failed}, bus_error ${m.protocolInfo.probe.bus_error}${m.protocolInfo.probe.bus_off ? ", bus-off" : ""}`
+                  : ""
+              }`
+          : null),
     },
     {
       name: "Bus check",

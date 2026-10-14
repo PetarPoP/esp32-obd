@@ -43,6 +43,19 @@ class TwaiDriver {
   // controller is (again) running.
   bool RecoverIfBusOff();
 
+  // Error counters of the running controller, for judging a failed probe: if
+  // tx_error / tx_failed climb while bus_error stays low, our frames never reach
+  // the bus (e.g. transceiver in read-only mode); if nothing climbs the car is
+  // simply not answering.
+  struct Counters {
+    uint32_t tx_error = 0;
+    uint32_t tx_failed = 0;
+    uint32_t bus_error = 0;
+    uint32_t arb_lost = 0;
+    bool bus_off = false;
+  };
+  bool ReadCounters(Counters& out);
+
   // Bus error counter since the driver was installed (0 if not installed).
   uint32_t BusErrorCount();
 

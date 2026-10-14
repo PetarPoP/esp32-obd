@@ -28,9 +28,12 @@ type SheetName = "codes" | "vehicle" | "values" | "dashboard" | "settings" | "ad
 function busLabel(m: ObdMonitor, vehicle: VehicleSelection): { title: string; subtitle: string } {
   if (vehicle.kind === "smart_ed3") return { title: "CAN 500k", subtitle: "Smart ED" };
   if (m.probeStage) return { title: "Detecting…", subtitle: m.probeStage };
-  const id = (m.protocolInfo?.ok ? m.protocolInfo.protocol : m.status?.protocol) ?? "";
+  const unverified = m.protocolInfo?.reason === "unverified";
+  const id = (m.protocolInfo?.ok || unverified ? m.protocolInfo?.protocol : m.status?.protocol) ?? "";
   const match = /^can(11|29)_(\d+)$/.exec(id);
-  if (match) return { title: `CAN ${match[2]}k`, subtitle: match[1] === "11" ? "ISO 15765" : "29-bit IDs" };
+  if (match) {
+    return { title: `CAN ${match[2]}k`, subtitle: unverified ? "Unverified" : match[1] === "11" ? "ISO 15765" : "29-bit IDs" };
+  }
   if (m.protocolInfo && !m.protocolInfo.ok) return { title: "No answer", subtitle: "Ignition on?" };
   return { title: "Bus", subtitle: m.ready ? "Not detected" : "—" };
 }

@@ -85,7 +85,7 @@ obd::services::ExtPidService g_ext_pids(g_transport, g_ble);
 obd::services::OtaService g_ota(g_ble);
 obd::services::PowerManager g_power(g_twai, g_ble);
 
-constexpr char kFirmwareVersion[] = "2.1.0";
+constexpr char kFirmwareVersion[] = "2.1.1";
 
 // BLE writes arrive on the Bluetooth task. Commands are queued and executed
 // from loop() so long operations (protocol detection, DTC reads, bus scans)
@@ -182,6 +182,22 @@ void PublishProtocol(bool ok, const char* reason) {
     payload += reason;
     payload += "\"";
   }
+  if (!ok && g_auto_protocol) {
+    // Tells "our frames do not reach the bus" (tx_error/tx_failed climb) from
+    // "the car does not answer" (everything stays 0).
+    const obd::drivers::TwaiDriver::Counters& c = g_transport.ProbeCounters();
+    payload += ",\"probe\":{\"tx_error\":";
+    payload += String(c.tx_error);
+    payload += ",\"tx_failed\":";
+    payload += String(c.tx_failed);
+    payload += ",\"bus_error\":";
+    payload += String(c.bus_error);
+    payload += ",\"arb_lost\":";
+    payload += String(c.arb_lost);
+    payload += ",\"bus_off\":";
+    payload += c.bus_off ? "true" : "false";
+    payload += "}";
+  }
   if (ok) {
     if (g_transport.IsCan()) {
       payload += ",\"baud_kbps\":";
@@ -251,7 +267,9 @@ void RunProtocolDetection(const String& protocol_text) {
       g_twai.BeginAt(g_twai.BaudKbps(), /*listen_only=*/true);
     }
   }
-  PublishProtocol(ok, ok ? nullptr : "no_response");
+  // Without an answer to the probe but with traffic heard, the transport falls
+  // back to unverified requests at that baud ("unverified"); see AutoDetect.
+  PublishProtocol(ok, ok ? nullptr : (g_transport.IsConnected() ? "unverified" : "no_response"));
   PublishStatusSnapshot();
   PublishCapabilitiesSnapshot();
   // Resume streaming even without a vehicle so the app keeps getting
@@ -452,7 +470,7 @@ void PublishCapabilitiesSnapshot() {
   const bool confirmed = g_transport.SupportedPidsKnown();
   String missing;
   static const char* const kLegacyMetrics[] = {"rpm", "coolant_c", "throttle_pct", "speed_kmh"};
-  String supported_chunks[24];
+  String supported_chunks[48];
   uint8_t chunk_count = 0;
   String current;
   for (size_t i = 0; i < obd::core::kPidCatalogueLen; ++i) {
@@ -469,7 +487,7 @@ void PublishCapabilitiesSnapshot() {
       }
       continue;
     }
-    if (current.length() + strlen(field.json_key) > 150 && chunk_count < 23) {
+    if (current.length() + strlen(field.json_key) + 3 > 90 && chunk_count < 47) {
       supported_chunks[chunk_count++] = current;
       current = "";
     }
@@ -504,11 +522,11 @@ void PublishCapabilitiesSnapshot() {
 // supported_metrics / missing_metrics, split to fit the BLE MTU.
 void PublishKeyList(const char* type, const char* const* keys, size_t count, const String& missing,
                     bool confirmed) {
-  String chunks[24];
+  String chunks[48];
   uint8_t chunk_count = 0;
   String current;
   for (size_t i = 0; i < count; ++i) {
-    if (current.length() + strlen(keys[i]) > 150 && chunk_count < 23) {
+    if (current.length() + strlen(keys[i]) + 3 > 90 && chunk_count < 47) {
       chunks[chunk_count++] = current;
       current = "";
     }

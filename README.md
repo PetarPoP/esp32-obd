@@ -70,6 +70,26 @@ Slika bez potpisa ili s krivim potpisom odbija se (`signature_required`,
 - **Ključ treba sačuvati** (npr. u upravitelju lozinki): bez njega se novi
   firmware više ne može poslati preko OTA, samo USB-om.
 
+### Traženje protokola: ponavljanje i "unverified"
+
+Od 2.1.1 probni upit `01 00` šalje se do 3 puta (300 ms) i s normalnim
+ponavljanjem okvira kad je na toj brzini već čut promet (single-shot samo na
+nepoznatoj brzini). Ako auto ne odgovori na probu, a okviri su čuti, ESP ostaje
+aktivan na toj brzini i šalje PID upite bez provjere (kao `set_link` bez
+`protocol`); poruka `protocol` tada ima `ok:false`, `reason:"unverified"`.
+
+### Dijagnostika neuspjelog traženja protokola
+
+Kad `detect_protocol` ne nađe auto, poruka `protocol` (firmware 2.1.1+) sadrži
+`probe` s brojačima CAN kontrolera tijekom aktivnih pokušaja:
+
+- `tx_error` / `tx_failed` rastu, a `bus_error` ne: naši okviri ne dolaze na
+  sabirnicu (npr. transceiver na shieldu je samo za slušanje, lemni jumper RW
+  nije premošten, ili je pokvaren TX vod).
+- `bus_error` raste: kriva brzina ili neispravna sabirnica.
+- sve je 0, a `msgs_to_rx` u `bus_diag` raste: sabirnica radi, auto samo ne
+  odgovara na CAN OBD upite (npr. koristi K-line).
+
 ### CAN sabirnica
 
 - Nakon paljenja ESP32 je u `listen_only` načinu (500 kbps) i ništa ne šalje na
