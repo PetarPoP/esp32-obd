@@ -84,6 +84,8 @@ export type ProtocolMessage = {
   baud_kbps?: number;
   supported_pids?: string;
   vin?: string;
+  /** Firmware 2.1.1+: TWAI counters after failed probes (see README). */
+  probe?: { tx_error: number; tx_failed: number; bus_error: number; arb_lost: number; bus_off: boolean };
   ts: number;
 };
 

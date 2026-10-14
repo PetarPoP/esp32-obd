@@ -163,6 +163,19 @@ bool TwaiDriver::IsInstalled() const { return installed_; }
 bool TwaiDriver::IsListenOnly() const { return listen_only_; }
 uint32_t TwaiDriver::BaudKbps() const { return baud_kbps_; }
 
+bool TwaiDriver::ReadCounters(Counters& out) {
+  twai_status_info_t info;
+  if (!installed_ || twai_get_status_info(&info) != ESP_OK) {
+    return false;
+  }
+  out.tx_error = info.tx_error_counter;
+  out.tx_failed = info.tx_failed_count;
+  out.bus_error = info.bus_error_count;
+  out.arb_lost = info.arb_lost_count;
+  out.bus_off = info.state == TWAI_STATE_BUS_OFF || info.state == TWAI_STATE_RECOVERING;
+  return true;
+}
+
 String TwaiDriver::GetStatusJson() {
   if (!installed_) {
     return String();

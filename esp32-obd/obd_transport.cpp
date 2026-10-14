@@ -161,6 +161,7 @@ void ObdTransport::UseCanUnverified() {
 
 ObdProtocol ObdTransport::AutoDetect(ProgressCallback progress) {
   Disconnect();
+  probe_counters_ = drivers::TwaiDriver::Counters();
 
   // 1) Passive listen at each OBD CAN baud. A baud that receives clean frames
   //    is certainly right; one that only produces bus errors is certainly wrong.
@@ -230,6 +231,14 @@ bool ObdTransport::Connect(ObdProtocol protocol) {
   const bool ok = VerifyWithPid00();
   probing_ = false;
   if (!ok) {
+    drivers::TwaiDriver::Counters c;
+    if (twai_driver_.ReadCounters(c)) {
+      probe_counters_.tx_error = c.tx_error > probe_counters_.tx_error ? c.tx_error : probe_counters_.tx_error;
+      probe_counters_.tx_failed = c.tx_failed > probe_counters_.tx_failed ? c.tx_failed : probe_counters_.tx_failed;
+      probe_counters_.bus_error = c.bus_error > probe_counters_.bus_error ? c.bus_error : probe_counters_.bus_error;
+      probe_counters_.arb_lost = c.arb_lost > probe_counters_.arb_lost ? c.arb_lost : probe_counters_.arb_lost;
+      probe_counters_.bus_off = probe_counters_.bus_off || c.bus_off;
+    }
     twai_driver_.RecoverIfBusOff();
     protocol_ = ObdProtocol::kNone;
     return false;

@@ -221,6 +221,8 @@ void TransportBle::NotifyTelemetry(const String& json_payload) {
   Serial.println(json_payload);
 }
 
+void TransportBle::NotifyRawFrame(const String& json_payload) { Notify(g_telemetry_char, json_payload); }
+
 void TransportBle::NotifyResponse(const String& json_payload) {
   Notify(g_response_char, json_payload);
   Serial.println(json_payload);

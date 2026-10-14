@@ -24,6 +24,10 @@ class TransportBle {
 
   bool Begin();
   void NotifyTelemetry(const String& json_payload);
+  // Same as NotifyTelemetry without echoing to the serial port. Raw CAN frames
+  // arrive by the hundreds per second; printing each one at 115200 baud stalls
+  // the loop and makes the controller drop frames.
+  void NotifyRawFrame(const String& json_payload);
   void NotifyResponse(const String& json_payload);
   // True while a paired (or, without kRequirePairing, any) phone is connected.
   bool IsConnected() const;

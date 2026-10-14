@@ -134,6 +134,9 @@ class ObdTransport {
   // that the link is gone and a new detection is needed.
   uint16_t ConsecutiveFailures() const;
 
+  // Worst TWAI counters seen while the last AutoDetect probed the bus actively.
+  const drivers::TwaiDriver::Counters& ProbeCounters() const { return probe_counters_; }
+
  private:
   struct Addressing {
     uint32_t tx = 0;
@@ -167,6 +170,7 @@ class ObdTransport {
   bool supported_pids_known_ = false;
 
   uint16_t consecutive_failures_ = 0;
+  drivers::TwaiDriver::Counters probe_counters_;
 };
 
 }  // namespace core

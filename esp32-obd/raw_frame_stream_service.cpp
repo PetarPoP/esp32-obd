@@ -21,7 +21,7 @@ void RawFrameStreamService::Publish(const drivers::CanFrame& frame) {
   payload += "\",\"ts\":";
   payload += String(frame.timestamp_ms);
   payload += "}";
-  app_link_.NotifyTelemetry(payload);
+  app_link_.NotifyRawFrame(payload);
 }
 
 }  // namespace services
