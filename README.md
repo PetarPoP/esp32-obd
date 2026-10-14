@@ -70,6 +70,14 @@ Slika bez potpisa ili s krivim potpisom odbija se (`signature_required`,
 - **Ključ treba sačuvati** (npr. u upravitelju lozinki): bez njega se novi
   firmware više ne može poslati preko OTA, samo USB-om.
 
+### Traženje protokola: ponavljanje i "unverified"
+
+Od 2.1.1 probni upit `01 00` šalje se do 3 puta (300 ms) i s normalnim
+ponavljanjem okvira kad je na toj brzini već čut promet (single-shot samo na
+nepoznatoj brzini). Ako auto ne odgovori na probu, a okviri su čuti, ESP ostaje
+aktivan na toj brzini i šalje PID upite bez provjere (kao `set_link` bez
+`protocol`); poruka `protocol` tada ima `ok:false`, `reason:"unverified"`.
+
 ### Dijagnostika neuspjelog traženja protokola
 
 Kad `detect_protocol` ne nađe auto, poruka `protocol` (firmware 2.1.1+) sadrži

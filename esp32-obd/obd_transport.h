@@ -81,7 +81,10 @@ class ObdTransport {
   ObdProtocol AutoDetect(ProgressCallback progress = nullptr);
 
   // Sets up the controller for one CAN protocol and verifies it with 01 00.
-  bool Connect(ObdProtocol protocol);
+  // baud_has_traffic: valid CAN frames were already heard at this baud, so the
+  // baud is certainly right and requests may be retransmitted normally; without
+  // it probe frames are single-shot to avoid disturbing a bus at a wrong baud.
+  bool Connect(ObdProtocol protocol, bool baud_has_traffic = false);
 
   // Legacy set_link path: 11-bit OBD addressing on the already configured
   // TWAI baud, without verification (no protocol in listen-only mode).
@@ -153,7 +156,7 @@ class ObdTransport {
   bool AcceptResponse(const uint8_t* request, uint8_t request_len, const uint8_t* data,
                       uint8_t len, uint32_t& deadline);
   void StoreMessage(uint8_t ecu, const uint8_t* data, uint8_t len);
-  bool VerifyWithPid00();
+  bool VerifyWithPid00(uint8_t attempts, uint32_t timeout_ms);
   void ClearSupportedPids();
   void MergeSupportedBlock(uint8_t base_pid);
 

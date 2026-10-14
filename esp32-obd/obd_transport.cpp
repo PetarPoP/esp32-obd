@@ -30,6 +30,7 @@ constexpr uint32_t kCanMultiFrameTimeoutMs = 1000;
 constexpr uint32_t kCanConsecutiveFrameTimeoutMs = 200;
 constexpr uint32_t kResponsePendingTimeoutMs = 5000;  // P2* max
 constexpr uint32_t kCanListenWindowMs = 250;
+constexpr uint32_t kCanFirstRequestTimeoutMs = 300;
 
 bool IsExtendedCan(ObdProtocol p) {
   return p == ObdProtocol::kCan29_500 || p == ObdProtocol::kCan29_250;
@@ -203,18 +204,34 @@ ObdProtocol ObdTransport::AutoDetect(ProgressCallback progress) {
       if (progress != nullptr) {
         progress("probe", candidate);
       }
-      if (Connect(candidate)) {
+      if (Connect(candidate, probe.frames > 0)) {
         return protocol_;
       }
     }
   }
 
-  // Nothing answered: leave the controller passive.
+  // Nothing answered. If CAN frames were heard at a baud, that baud is right:
+  // stay active there and send requests without verification (the behaviour of
+  // set_link without "protocol"), so a car that answers real PID requests but
+  // not our probe still works. Otherwise leave the controller passive.
+  uint32_t best_baud = 0;
+  uint32_t best_frames = 0;
+  for (const BaudProbe& probe : bauds) {
+    if (probe.frames > best_frames) {
+      best_frames = probe.frames;
+      best_baud = probe.baud_kbps;
+    }
+  }
+  if (best_frames > 0 && twai_driver_.BeginAt(best_baud, /*listen_only=*/false)) {
+    Begin();
+    UseCanUnverified();
+    return ObdProtocol::kNone;  // not verified, but IsConnected() is true
+  }
   twai_driver_.BeginAt(500, /*listen_only=*/true);
   return ObdProtocol::kNone;
 }
 
-bool ObdTransport::Connect(ObdProtocol protocol) {
+bool ObdTransport::Connect(ObdProtocol protocol, bool baud_has_traffic) {
   Disconnect();
   consecutive_failures_ = 0;
   if (diagnostic_profile_ != DiagnosticProfile::kObdMode01 || !IsCanProtocol(protocol) ||
@@ -227,8 +244,10 @@ bool ObdTransport::Connect(ObdProtocol protocol) {
   }
   Begin();
   protocol_ = protocol;
-  probing_ = true;
-  const bool ok = VerifyWithPid00();
+  probing_ = !baud_has_traffic;
+  // Some ECUs need well over 150 ms for the first request after ignition on,
+  // and a busy bus can make a single try lose arbitration: ask a few times.
+  const bool ok = VerifyWithPid00(baud_has_traffic ? 3 : 2, kCanFirstRequestTimeoutMs);
   probing_ = false;
   if (!ok) {
     drivers::TwaiDriver::Counters c;
@@ -247,9 +266,15 @@ bool ObdTransport::Connect(ObdProtocol protocol) {
   return true;
 }
 
-bool ObdTransport::VerifyWithPid00() {
+bool ObdTransport::VerifyWithPid00(uint8_t attempts, uint32_t timeout_ms) {
   const uint8_t request[2] = {0x01, 0x00};
-  return Request(request, sizeof(request), /*wait_for_all=*/true) > 0;
+  for (uint8_t i = 0; i < attempts; ++i) {
+    if (Request(request, sizeof(request), /*wait_for_all=*/true, timeout_ms) > 0) {
+      return true;
+    }
+    delay(40);
+  }
+  return false;
 }
 
 bool ObdTransport::AcceptResponse(const uint8_t* request, uint8_t request_len,

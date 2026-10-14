@@ -267,7 +267,9 @@ void RunProtocolDetection(const String& protocol_text) {
       g_twai.BeginAt(g_twai.BaudKbps(), /*listen_only=*/true);
     }
   }
-  PublishProtocol(ok, ok ? nullptr : "no_response");
+  // Without an answer to the probe but with traffic heard, the transport falls
+  // back to unverified requests at that baud ("unverified"); see AutoDetect.
+  PublishProtocol(ok, ok ? nullptr : (g_transport.IsConnected() ? "unverified" : "no_response"));
   PublishStatusSnapshot();
   PublishCapabilitiesSnapshot();
   // Resume streaming even without a vehicle so the app keeps getting
