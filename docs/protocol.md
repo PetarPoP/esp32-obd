@@ -22,13 +22,14 @@ glavnom [README.md](../README.md#ble-sučelje). Ovdje je sažetak.
 
 Ostale: `stop_stream`, `detect_protocol`, `probe_capabilities`, `read_freeze_frame`,
 `read_readiness`, `read_monitor_tests`, `vehicle_info`, `ext_list`, `ext_clear`,
-`set_power`, `ota_begin`, `ota_end`, `ota_abort`, `bus_scan`, `bus_diag`.
+`set_power`, `ota_begin` (s `sig`), `ota_end`, `ota_abort`, `bus_scan`, `bus_diag`,
+`device_info`, `set_pin`, `forget_bonds`. Od firmwarea 2.1.0 veza mora biti uparena (PIN).
 
 ## Poruke s ESP-a (polje `type`)
 
 `ack`, `status`, `link`, `protocol_probe`, `protocol`, `device`, `capability`
 (u dijelovima), `telemetry` (dugačke dolaze u dijelovima s `"partial":true`),
-`dtc`, `clear_dtc`, `freeze_frame`, `readiness`, `monitor_test`,
+`security`, `dtc`, `clear_dtc`, `freeze_frame`, `readiness`, `monitor_test`,
 `monitor_tests_done`, `vehicle_info`, `ext_add`, `ext_list`, `ota`, `log`,
 `raw_frame`, `bus_diag`, `bus_scan_start`, `bus_scan_result`, `bus_scan_done`.
 

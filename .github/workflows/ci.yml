@@ -1,0 +1,81 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  firmware:
+    name: Firmware (arduino-cli)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: arduino/setup-arduino-cli@v2
+      - name: Cache Arduino cores and libraries
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.arduino15
+            ~/Arduino/libraries
+          key: arduino-esp32-3.3.8-nimble-2.5.0
+      - name: Install ESP32 core and NimBLE
+        run: |
+          arduino-cli config init --overwrite
+          arduino-cli config add board_manager.additional_urls https://espressif.github.io/arduino-esp32/package_esp32_index.json
+          arduino-cli core update-index
+          arduino-cli core install esp32:esp32@3.3.8
+          arduino-cli lib install "NimBLE-Arduino@2.5.0"
+      - name: Compile
+        run: arduino-cli compile --fqbn esp32:esp32:esp32 --warnings default --output-dir build esp32-obd
+      - name: Check published firmware (size, MD5, OTA signature)
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, subprocess, sys
+          info = json.load(open("firmware/version.json"))
+          data = open("firmware/" + info["file"], "rb").read()
+          assert len(data) == info["size"], "size in version.json does not match the .bin"
+          assert hashlib.md5(data).hexdigest() == info["md5"], "md5 in version.json does not match the .bin"
+          assert "sig" in info, "firmware/version.json has no OTA signature"
+          sys.exit(subprocess.call([sys.executable, "tools/ota_sign.py", "verify", "firmware/" + info["file"], info["sig"]]))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: firmware-${{ github.sha }}
+          path: build/esp32-obd.ino.bin
+
+  app:
+    name: App (TypeScript)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+
+  profiles:
+    name: Profiles and generated data
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Check vehicle profiles
+        run: python tools/check_profiles.py profiles/
+      - name: Metric catalogue matches the firmware
+        run: |
+          python tools/gen_app_metrics.py
+          git diff --exit-code -- mobile/src/data/metrics.generated.ts

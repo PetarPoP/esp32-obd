@@ -20,7 +20,10 @@ export type ObdCommand =
   | "set_power"
   | "ota_begin"
   | "ota_end"
-  | "ota_abort";
+  | "ota_abort"
+  | "set_pin"
+  | "forget_bonds"
+  | "device_info";
 
 export type CanBaudKbps = 100 | 125 | 250 | 500 | 1000;
 export type CanLinkMode = "listen_only" | "active";
@@ -99,6 +102,21 @@ export type DeviceMessage = {
   mtu: number;
   ext_pids: number;
   ext_pids_max: number;
+  /** Firmware 2.1+: BLE pairing with a PIN is required. */
+  pairing?: boolean;
+  /** Firmware 2.1+: the PIN is still the factory default (123456). */
+  pin_default?: boolean;
+  bonds?: number;
+  /** Firmware 2.1+: OTA images must carry a signature. */
+  ota_signed?: boolean;
+  ts: number;
+};
+
+export type SecurityMessage = {
+  type: "security";
+  event: "set_pin" | "forget_bonds";
+  ok: boolean;
+  reason?: string;
   ts: number;
 };
 
@@ -262,6 +280,7 @@ export type ObdInboundMessage =
   | ProtocolMessage
   | ProtocolProbeMessage
   | DeviceMessage
+  | SecurityMessage
   | DtcMessage
   | ClearDtcMessage
   | FreezeFrameMessage

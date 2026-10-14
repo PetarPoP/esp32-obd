@@ -6,6 +6,8 @@ export type FirmwareInfo = {
   file: string;
   size: number;
   md5: string;
+  /** ECDSA P-256 signature (hex r||s) of the image's SHA-256; required by firmware 2.1+. */
+  sig?: string;
 };
 
 export async function fetchFirmwareInfo(): Promise<FirmwareInfo> {
@@ -14,7 +16,13 @@ export async function fetchFirmwareInfo(): Promise<FirmwareInfo> {
     throw new Error(`version.json not found (${response.status})`);
   }
   const info = (await response.json()) as FirmwareInfo;
-  if (!info.version || !info.file || !info.size || !/^[0-9a-f]{32}$/.test(info.md5)) {
+  if (
+    !info.version ||
+    !info.file ||
+    !info.size ||
+    !/^[0-9a-f]{32}$/.test(info.md5) ||
+    (info.sig !== undefined && !/^[0-9a-f]{128}$/.test(info.sig))
+  ) {
     throw new Error("version.json is malformed");
   }
   return info;

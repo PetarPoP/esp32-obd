@@ -8,8 +8,12 @@ it to the ESP over BLE (OTA). The ESP checks the MD5 before it switches over.
 The version is kFirmwareVersion in esp32-obd/esp32-obd.ino: raise it before
 publishing, otherwise the app sees no update.
 
+The image is signed with the OTA signing key (tools/ota_sign.py); firmware
+2.1.0 and newer refuses images without a valid signature. The key is read from
+--key, $OTA_SIGNING_KEY(_HEX) or ~/.esp32-obd/ota_signing_key.hex.
+
 Usage:
-    python tools/publish_firmware.py [--arduino-cli PATH] [--fqbn esp32:esp32:esp32]
+    python tools/publish_firmware.py [--arduino-cli PATH] [--fqbn esp32:esp32:esp32] [--key PATH]
 """
 
 import argparse
@@ -21,6 +25,8 @@ import shutil
 import subprocess
 import sys
 import tempfile
+
+import ota_sign
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SKETCH = os.path.join(ROOT, "esp32-obd")
@@ -48,10 +54,12 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--arduino-cli")
     parser.add_argument("--fqbn", default="esp32:esp32:esp32")
+    parser.add_argument("--key", help="OTA signing key file (hex)")
     args = parser.parse_args()
 
     cli = find_cli(args.arduino_cli)
     version = sketch_version()
+    ota_sign.load_private_key(args.key)  # fail before the long build if the key is missing
     with tempfile.TemporaryDirectory() as build:
         subprocess.run([cli, "compile", "--fqbn", args.fqbn, "--build-path", build, SKETCH], check=True)
         built = os.path.join(build, "esp32-obd.ino.bin")
@@ -62,11 +70,17 @@ def main():
 
     with open(os.path.join(OUT, BIN_NAME), "rb") as f:
         data = f.read()
-    info = {"version": version, "file": BIN_NAME, "size": len(data), "md5": hashlib.md5(data).hexdigest()}
+    info = {
+        "version": version,
+        "file": BIN_NAME,
+        "size": len(data),
+        "md5": hashlib.md5(data).hexdigest(),
+        "sig": ota_sign.sign_file(os.path.join(OUT, BIN_NAME), args.key),
+    }
     with open(os.path.join(OUT, "version.json"), "w", encoding="utf-8", newline="\n") as f:
         json.dump(info, f, indent=1)
         f.write("\n")
-    print(f"firmware {version}: {len(data)} bytes, md5 {info['md5']}")
+    print(f"firmware {version}: {len(data)} bytes, md5 {info['md5']}, signed")
 
 
 if __name__ == "__main__":

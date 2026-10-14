@@ -85,7 +85,7 @@ obd::services::ExtPidService g_ext_pids(g_transport, g_ble);
 obd::services::OtaService g_ota(g_ble);
 obd::services::PowerManager g_power(g_twai, g_ble);
 
-constexpr char kFirmwareVersion[] = "2.0.0";
+constexpr char kFirmwareVersion[] = "2.1.0";
 
 // BLE writes arrive on the Bluetooth task. Commands are queued and executed
 // from loop() so long operations (protocol detection, DTC reads, bus scans)
@@ -157,6 +157,13 @@ void PublishDeviceInfo() {
   payload += String(g_ext_pids.Count());
   payload += ",\"ext_pids_max\":";
   payload += String(obd::services::ExtPidService::kMaxSignals);
+  payload += ",\"pairing\":";
+  payload += obd::app_link::TransportBle::kRequirePairing ? "true" : "false";
+  payload += ",\"pin_default\":";
+  payload += g_ble.PasskeyIsDefault() ? "true" : "false";
+  payload += ",\"bonds\":";
+  payload += String(g_ble.BondCount());
+  payload += ",\"ota_signed\":true";
   payload += ",\"ts\":";
   payload += String(millis());
   payload += "}";
@@ -651,7 +658,8 @@ void HandleBleCommand(const String& command, const String& raw_payload) {
 
   if (command == "ota_begin") {
     g_scheduler.SetStreamingEnabled(false);
-    g_ota.Begin(static_cast<size_t>(json.GetNumber("size", 0)), json.GetString("md5"));
+    g_ota.Begin(static_cast<size_t>(json.GetNumber("size", 0)), json.GetString("md5"),
+                json.GetString("sig"));
     return;
   }
 
@@ -670,6 +678,42 @@ void HandleBleCommand(const String& command, const String& raw_payload) {
       g_power.SetSleepAfterSeconds(static_cast<uint32_t>(json.GetNumber("sleep_after_s", 0)));
     }
     PublishDeviceInfo();
+    return;
+  }
+
+  if (command == "device_info") {
+    PublishDeviceInfo();
+    return;
+  }
+
+  if (command == "set_pin") {
+    // Only reachable over an already paired link. The PIN is a string of
+    // exactly six digits so a leading zero survives.
+    const String pin = json.GetString("pin");
+    bool valid = pin.length() == 6;
+    for (size_t i = 0; valid && i < pin.length(); ++i) {
+      valid = isDigit(pin.charAt(i));
+    }
+    const bool ok = valid && g_ble.SetPasskey(static_cast<uint32_t>(pin.toInt()));
+    String payload = "{\"type\":\"security\",\"event\":\"set_pin\",\"ok\":";
+    payload += ok ? "true" : "false";
+    if (!ok) {
+      payload += valid ? ",\"reason\":\"nvs_failed\"" : ",\"reason\":\"pin_must_be_6_digits\"";
+    }
+    payload += ",\"ts\":";
+    payload += String(millis());
+    payload += "}";
+    g_ble.NotifyResponse(payload);
+    PublishDeviceInfo();
+    return;
+  }
+
+  if (command == "forget_bonds") {
+    // Reply first: the current phone loses its bond too and must pair again.
+    g_ble.NotifyResponse("{\"type\":\"security\",\"event\":\"forget_bonds\",\"ok\":true,\"ts\":" +
+                         String(millis()) + "}");
+    delay(200);
+    g_ble.ForgetBonds();
     return;
   }
 }

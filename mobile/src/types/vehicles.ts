@@ -1,49 +1,68 @@
 import { OBD_METRICS, SMART_ED_METRICS, type MetricDefinition } from "../data/metrics.generated";
+import type { ProfileCommand, ProfileSignal } from "../services/profileRepository";
 import type { LinkConfig } from "./protocol";
 
-export type VehicleKind = "generic" | "smart_ed3" | "profile";
+/** The car the user picked. A make & model also gets manufacturer signals. */
+export type VehicleSelection =
+  | { kind: "generic" }
+  | { kind: "smart_ed3" }
+  | { kind: "profile"; make: string; model: string; file: string };
 
-export type VehicleMode = {
-  id: VehicleKind;
-  label: string;
-  notes: string;
-  link: LinkConfig;
-  metrics: readonly MetricDefinition[];
-  defaultMetrics: readonly string[];
+export type VehicleKind = VehicleSelection["kind"];
+
+/** A manufacturer signal as stored on the phone (command without its other signals). */
+export type StoredExtSignal = {
+  key: string;
+  name: string;
+  unit: string;
+  path: string;
+  command: Omit<ProfileCommand, "signals">;
+  signal: ProfileSignal;
 };
 
-export const VEHICLE_MODES: readonly VehicleMode[] = [
-  {
-    id: "generic",
-    label: "Generic OBD-II (auto-detect)",
-    notes:
-      "Any car with OBD-II over CAN (EU/US from 2008). The ESP detects 11/29-bit CAN at 500/250 kbps, " +
-      "reads the supported PIDs and polls up to six per request.",
-    link: { baudKbps: 500, mode: "active", streamMode: "telemetry", diagnosticProfile: "obd_mode01", protocol: "auto" },
-    metrics: OBD_METRICS,
-    defaultMetrics: ["rpm", "speed_kmh", "coolant_c", "throttle_pct"],
-  },
-  {
-    id: "profile",
-    label: "Make & model (manufacturer PIDs)",
-    notes:
-      "Standard OBD-II plus manufacturer-specific values for the chosen make and model (OBDb profiles, " +
-      "community data). Pick the signals below and load them to the ESP.",
-    link: { baudKbps: 500, mode: "active", streamMode: "telemetry", diagnosticProfile: "obd_mode01", protocol: "auto" },
-    metrics: OBD_METRICS,
-    defaultMetrics: ["rpm", "speed_kmh", "coolant_c", "throttle_pct"],
-  },
-  {
-    id: "smart_ed3",
-    label: "Smart ED (451, 3rd gen)",
-    notes:
-      "Smart fortwo electric drive 2012–2015: broadcast frames plus UDS queries to BMS, cooling and charger " +
-      "(ported from ED_BMSdiag). The ESP streams every available value; pick which ones to show.",
-    link: { baudKbps: 500, mode: "active", streamMode: "telemetry", diagnosticProfile: "smart_ed3" },
-    metrics: SMART_ED_METRICS,
-    defaultMetrics: [
-      "soc_pct", "hv_v", "hv_amps", "power_kw", "lv_v", "range_km", "soh_pct", "cap_ah_mean",
-      "temp_max_c", "temp_min_c", "cell_mv_min", "cell_mv_max", "speed_kmh", "odo_km",
-    ],
-  },
-];
+/** What the user chose to read for one vehicle. */
+export type VehicleValues = {
+  /** Standard OBD-II (or Smart ED) metric keys. */
+  metrics: string[];
+  /** Manufacturer signals (make & model only). */
+  ext: StoredExtSignal[];
+};
+
+export function vehicleKey(v: VehicleSelection): string {
+  return v.kind === "profile" ? `profile:${v.file}` : v.kind;
+}
+
+export function vehicleName(v: VehicleSelection): string {
+  switch (v.kind) {
+    case "generic":
+      return "Generic OBD-II";
+    case "smart_ed3":
+      return "Smart ED (451)";
+    default:
+      return `${v.make} ${v.model}`;
+  }
+}
+
+export function linkConfig(v: VehicleSelection): LinkConfig {
+  return v.kind === "smart_ed3"
+    ? { baudKbps: 500, mode: "active", streamMode: "telemetry", diagnosticProfile: "smart_ed3" }
+    : { baudKbps: 500, mode: "active", streamMode: "telemetry", diagnosticProfile: "obd_mode01", protocol: "auto" };
+}
+
+/** Standard metric catalogue for the vehicle kind. */
+export function catalogueFor(v: VehicleSelection): readonly MetricDefinition[] {
+  return v.kind === "smart_ed3" ? SMART_ED_METRICS : OBD_METRICS;
+}
+
+export function defaultValues(v: VehicleSelection): VehicleValues {
+  if (v.kind === "smart_ed3") {
+    return {
+      metrics: ["soc_pct", "hv_v", "hv_amps", "power_kw", "lv_v", "range_km", "soh_pct", "temp_max_c", "speed_kmh"],
+      ext: [],
+    };
+  }
+  return {
+    metrics: ["rpm", "speed_kmh", "coolant_c", "throttle_pct", "engine_load_pct", "module_voltage_v"],
+    ext: [],
+  };
+}

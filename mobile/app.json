@@ -2,9 +2,9 @@
   "expo": {
     "name": "OBD BLE Monitor",
     "slug": "obd-ble-monitor",
-    "version": "2.0.0",
+    "version": "2.1.0",
     "orientation": "portrait",
-    "userInterfaceStyle": "dark",
+    "userInterfaceStyle": "automatic",
     "assetBundlePatterns": [
       "**/*"
     ],
@@ -27,7 +27,8 @@
           "isBackgroundEnabled": false,
           "bluetoothAlwaysPermission": "The app connects to the OBD-ESP32 adapter over Bluetooth."
         }
-      ]
+      ],
+      "./plugins/withReleaseSigning"
     ],
     "extra": {
       "eas": {
