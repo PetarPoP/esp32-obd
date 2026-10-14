@@ -1,6 +1,7 @@
 {
- "version": "2.0.0",
+ "version": "2.1.0",
  "file": "esp32-obd.bin",
- "size": 704768,
- "md5": "5dabd9898f2cfb0ff5a887f7ec0d4c2d"
+ "size": 729488,
+ "md5": "3073bb71d22dd779f351334b0e7a90b0",
+ "sig": "85fda4dcd364893414fc19c49c73dda8d4c298e6fdda27c09e29bdd7247ea647142f3c56b5630c55ef400b75186df7e13d165fdf2ec9a0bd91cb34f27e2f1e6b"
 }
