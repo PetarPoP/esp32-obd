@@ -35,9 +35,42 @@ arduino-cli upload  --fqbn esp32:esp32:esp32 -p COM3 esp32-obd
 ```
 
 Zadana particijska shema ("Default 4MB with spiffs") ima dvije aplikacijske
-particije, što treba za OTA nadogradnju. Firmware zauzima oko 53% jedne.
+particije, što treba za OTA nadogradnju. Firmware zauzima oko 55% jedne.
 
 ## Sigurnost
+
+### Bluetooth: uparivanje s PIN-om
+
+Od firmwarea 2.1.0 sve BLE karakteristike traže šifriranu i autenticiranu vezu
+(LE Secure Connections, passkey, bonding). Mobitel se upari jednom: kad ga
+Android pita, upiše se PIN adaptera (tvornički **123456**). Dok uparivanje nije
+gotovo, ESP ne šalje ništa i ne prima naredbe; kriv PIN prekida vezu.
+
+- PIN se mijenja iz aplikacije (Settings → Adapter → Bluetooth PIN) ili naredbom
+  `{"cmd":"set_pin","pin":"482913"}` (točno 6 znamenki, pamti se u flashu).
+  Već upareni mobiteli rade dalje, novi trebaju novi PIN.
+- `{"cmd":"forget_bonds"}` briše sve uparene mobitele (i trenutni); na mobitelu
+  zatim treba ukloniti `OBD-ESP32` u postavkama Bluetootha i upariti ponovno.
+- Poruka `device` javlja `pairing`, `pin_default` (još tvornički PIN) i `bonds`.
+- Uparivanje se isključuje s `kRequirePairing = false` u `transport_ble.h`.
+
+### Potpisani firmware za OTA
+
+ESP instalira OTA sliku samo ako je njezin SHA-256 potpisan ECDSA P-256 ključem
+čiji je javni dio ugrađen u firmware (`esp32-obd/ota_signing_key.h`). Privatni
+ključ nije u repozitoriju: `tools/publish_firmware.py` ga čita iz
+`~/.esp32-obd/ota_signing_key.hex` (ili `--key`, `$OTA_SIGNING_KEY`,
+`$OTA_SIGNING_KEY_HEX`) i upisuje potpis u `firmware/version.json` (`sig`).
+Slika bez potpisa ili s krivim potpisom odbija se (`signature_required`,
+`bad_signature`), a staro firmware ostaje aktivno.
+
+- Novi ključ: `python tools/ota_sign.py keygen` (zapisuje i novi `ota_signing_key.h`;
+  uređaji sa starim ključem tada primaju novu sliku samo preko USB-a).
+- Ručna provjera: `python tools/ota_sign.py verify firmware/esp32-obd.bin <sig>`.
+- **Ključ treba sačuvati** (npr. u upravitelju lozinki): bez njega se novi
+  firmware više ne može poslati preko OTA, samo USB-om.
+
+### CAN sabirnica
 
 - Nakon paljenja ESP32 je u `listen_only` načinu (500 kbps) i ništa ne šalje na
   sabirnicu dok aplikacija ne pošalje `set_link` ili `detect_protocol`.
@@ -90,9 +123,12 @@ Naredbe se izvršavaju redom (red od 16 mjesta); kad je red pun stiže
 | `vehicle_info` | | `vehicle_info`: `vin`, `cal_ids`, `ecu_names` |
 | `ext_add` | jedan proizvođački signal (vidi dolje) | `ext_add` s `ok`, `count` |
 | `ext_list` / `ext_clear` | | `ext_list` s ključevima učitanih signala |
-| `ota_begin` | `size`, `md5` | `ota` `ready`, zatim `progress` |
-| `ota_end` / `ota_abort` | | `ota` `done` (ponovno pokretanje) ili `aborted` |
+| `ota_begin` | `size`, `md5`, `sig` (potpis, 128 hex znakova) | `ota` `ready`, zatim `progress` |
+| `ota_end` / `ota_abort` | | `ota` `done` (ponovno pokretanje) ili `aborted` (npr. `bad_signature`) |
 | `set_power` | `sleep_after_s` (0 = nikad) | `device` |
+| `device_info` | | `device` (verzija, MTU, spavanje, uparivanje) |
+| `set_pin` | `pin`: 6 znamenki kao tekst | `security` `set_pin` s `ok`, zatim `device` |
+| `forget_bonds` | | `security` `forget_bonds`, zatim brisanje uparenih mobitela |
 | `bus_scan` | | `bus_scan_result` za 100/125/250/500/1000 kbps |
 | `bus_diag` | | `bus_diag` (stanje CAN kontrolera) |
 
@@ -170,21 +206,36 @@ i da se dekoder poklapa s OBDb referencom.
 
 ## OTA nadogradnja preko BLE-a
 
-Najjednostavnije iz aplikacije: Device → Firmware update → Check for update →
+Najjednostavnije iz aplikacije: Settings → Adapter → Firmware update → Check →
 Install. Aplikacija preuzima `firmware/esp32-obd.bin` i `firmware/version.json`
 s GitHuba (grana `master`) i šalje sliku na ESP. Nova verzija se objavljuje
 ovako: podigni `kFirmwareVersion` u `esp32-obd.ino`, pokreni
-`python tools/publish_firmware.py` i commitaj `firmware/`. Prvo flashanje
-firmwarea s OTA podrškom mora biti USB-om.
+`python tools/publish_firmware.py` (prevodi i potpisuje sliku) i commitaj
+`firmware/`. Prvo flashanje firmwarea s OTA podrškom mora biti USB-om.
 
 Isto ručno:
 
-1. `{"cmd":"ota_begin","size":704512,"md5":"<md5 .bin datoteke>"}` → `ota` `ready`
+1. `{"cmd":"ota_begin","size":729488,"md5":"<md5>","sig":"<potpis iz version.json>"}` → `ota` `ready`
 2. aplikacija piše `.bin` u dijelovima (do MTU−3 bajta) na karakteristiku OTA podataka
-3. `{"cmd":"ota_end"}` → provjera MD5, `ota` `done` i ponovno pokretanje
+3. `{"cmd":"ota_end"}` → provjera potpisa i MD5, `ota` `done` i ponovno pokretanje
 
 Napredak stiže kao `ota` `progress` svakih 5%. Ako bilo što pođe krivo, staro
 firmware ostaje aktivno.
+
+## CI i izdanja
+
+- [`.github/workflows/ci.yml`](.github/workflows/ci.yml) na svaki push i pull
+  request prevodi firmware (arduino-cli, ESP32 3.3.8, NimBLE-Arduino 2.5.0),
+  provjerava veličinu, MD5 i potpis objavljenog `firmware/`, radi `tsc` za
+  aplikaciju, `tools/check_profiles.py` i provjeru da je katalog metrika
+  aplikacije usklađen s firmwareom.
+- [`.github/workflows/release-apk.yml`](.github/workflows/release-apk.yml) gradi
+  Android APK. Izdanje: podigni `version` u `mobile/app.json`, pa
+  `git tag app-v2.1.0 && git push origin app-v2.1.0`; APK se pojavi u GitHub
+  Releases. Bez taga (Actions → Release APK → Run workflow) APK je samo artefakt.
+  APK je potpisan debug ključem dok se ne dodaju tajne `ANDROID_KEYSTORE_BASE64`,
+  `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS` i `ANDROID_KEY_PASSWORD`
+  (prelazak s debug na vlastiti ključ traži jednu deinstalaciju aplikacije).
 
 ## Smart ED profil
 

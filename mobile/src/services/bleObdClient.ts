@@ -13,6 +13,30 @@ class BleObdClient {
   private device: Device | null = null;
   private subscriptions: Subscription[] = [];
   private disconnectSubscription: Subscription | null = null;
+  private payloadListener: PayloadListener | null = null;
+
+  /**
+   * Subscribes to the notify characteristics again. Firmware 2.1+ only accepts
+   * subscriptions over a paired link, so the first attempt can fail while the
+   * user is still typing the PIN.
+   */
+  resubscribe(): void {
+    if (!this.device || !this.payloadListener) return;
+    this.subscriptions.forEach((sub) => sub.remove());
+    this.subscriptions = [];
+    this.subscribeNotifications(this.payloadListener);
+  }
+
+  /** Signal strength of the current connection in dBm, or null. */
+  async readRssi(): Promise<number | null> {
+    if (!this.device) return null;
+    try {
+      const d = await this.manager.readRSSIForDevice(this.device.id);
+      return d.rssi ?? null;
+    } catch {
+      return null;
+    }
+  }
 
   async connect(payloadListener: PayloadListener, connectionListener: ConnectionListener): Promise<void> {
     await this.requestAndroidPermissions();
@@ -43,6 +67,7 @@ class BleObdClient {
           this.device = await device.connect();
           this.device = await this.device.requestMTU(247);
           await this.device.discoverAllServicesAndCharacteristics();
+          this.payloadListener = payloadListener;
           this.subscribeNotifications(payloadListener);
           this.disconnectSubscription?.remove();
           this.disconnectSubscription = this.manager.onDeviceDisconnected(this.device.id, () => {

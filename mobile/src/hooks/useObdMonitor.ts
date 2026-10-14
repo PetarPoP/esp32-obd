@@ -1,14 +1,10 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Alert, Share } from "react-native";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Share } from "react-native";
 
 import { APP_CONFIG } from "../config";
 import { bleObdClient } from "../services/bleObdClient";
 import { downloadFirmware, fetchFirmwareInfo, isNewerVersion, type FirmwareInfo } from "../services/firmwareRepository";
-import {
-  extAddBody,
-  firmwareKey,
-  type ExtSignalSelection,
-} from "../services/profileRepository";
+import { extAddBody, firmwareKey } from "../services/profileRepository";
 import { parseInboundMessage } from "../services/protocol";
 import type {
   BusScanResultMessage,
@@ -17,21 +13,31 @@ import type {
   ExtAddMessage,
   MonitorTestMessage,
   ObdCommand,
-  OtaMessage,
   ObdInboundMessage,
+  OtaMessage,
   ProtocolMessage,
   ReadinessMessage,
   StatusMessage,
   TelemetryValues,
   VehicleInfoMessage,
 } from "../types/protocol";
-import { VEHICLE_MODES, type VehicleKind, type VehicleMode } from "../types/vehicles";
+import { linkConfig, vehicleName, type StoredExtSignal, type VehicleSelection, type VehicleValues } from "../types/vehicles";
 
 // The console keeps at most this many lines and is flushed to React state
 // in batches, so heavy BLE traffic never re-renders the dashboard per notify.
 const MAX_CONSOLE_LINES = 300;
 const CONSOLE_FLUSH_INTERVAL_MS = 250;
 const EXT_ADD_TIMEOUT_MS = 2000;
+const OTA_READY_TIMEOUT_MS = 8000;
+const OTA_DONE_TIMEOUT_MS = 20000;
+const RECONNECT_DELAY_MS = 5000;
+const RSSI_INTERVAL_MS = 5000;
+// Pairing: the user may need a while to type the PIN.
+const HANDSHAKE_ATTEMPTS = 25;
+const HANDSHAKE_WAIT_MS = 3000;
+/** Charts keep this much history per value. */
+export const HISTORY_WINDOW_MS = 30000;
+const TOAST_MS = 3500;
 
 function timestampPrefix(): string {
   const d = new Date();
@@ -46,54 +52,70 @@ export type FirmwareState = {
   latest: FirmwareInfo | null;
 };
 
-const OTA_READY_TIMEOUT_MS = 8000;
-const OTA_DONE_TIMEOUT_MS = 20000;
-const RECONNECT_DELAY_MS = 5000;
-
 export type ExtLoadState = { running: boolean; sent: number; total: number; failed: string[] };
+export type HistoryPoint = { t: number; v: number };
+export type LinkState = "disconnected" | "connecting" | "pairing" | "ready";
 
-export function useObdMonitor() {
-  const [connected, setConnected] = useState(false);
+type Options = { vehicle: VehicleSelection; values: VehicleValues };
+
+export function useObdMonitor({ vehicle, values }: Options) {
+  const [link, setLink] = useState<LinkState>("disconnected");
+  const [bleConnected, setBleConnected] = useState(false);
   const [connecting, setConnecting] = useState(false);
+  const [rssi, setRssi] = useState<number | null>(null);
   const [lastAck, setLastAck] = useState("none");
-
-  const [modeId, setModeId] = useState<VehicleKind>("generic");
-  const mode = useMemo<VehicleMode>(() => VEHICLE_MODES.find((m) => m.id === modeId) ?? VEHICLE_MODES[0], [modeId]);
-  const [selectedMetrics, setSelectedMetrics] = useState<string[]>([...VEHICLE_MODES[0].defaultMetrics]);
+  const [toast, setToast] = useState<string | null>(null);
 
   const [telemetry, setTelemetry] = useState<TelemetryValues>({});
   const [telemetryStatus, setTelemetryStatus] = useState<"ok" | "degraded" | "none">("none");
+  const history = useRef<Map<string, HistoryPoint[]>>(new Map());
   const [status, setStatus] = useState<StatusMessage | null>(null);
   const [protocolInfo, setProtocolInfo] = useState<ProtocolMessage | null>(null);
   const [probeStage, setProbeStage] = useState<string | null>(null);
   const [device, setDevice] = useState<DeviceMessage | null>(null);
 
   const [supportedMetrics, setSupportedMetrics] = useState<string[]>([]);
-  const [missingMetrics, setMissingMetrics] = useState<string[]>([]);
   const [capabilitiesConfirmed, setCapabilitiesConfirmed] = useState(false);
+  const capabilityBuffer = useRef<string[]>([]);
 
   const [dtc, setDtc] = useState<DtcMessage | null>(null);
+  const [dtcReading, setDtcReading] = useState(false);
+  const [clearConfirm, setClearConfirm] = useState<{ token: string; expires: number } | null>(null);
   const [freezeFrame, setFreezeFrame] = useState<Record<string, unknown> | null>(null);
   const [readiness, setReadiness] = useState<ReadinessMessage | null>(null);
   const [monitorTests, setMonitorTests] = useState<MonitorTestMessage[]>([]);
   const [monitorRunning, setMonitorRunning] = useState(false);
   const [vehicleInfo, setVehicleInfo] = useState<VehicleInfoMessage | null>(null);
 
-  const [extSignals, setExtSignals] = useState<ExtSignalSelection[]>([]);
   const [extLoad, setExtLoad] = useState<ExtLoadState>({ running: false, sent: 0, total: 0, failed: [] });
   const [extOnDevice, setExtOnDevice] = useState<string[]>([]);
   const extWaiter = useRef<((msg: ExtAddMessage | null) => void) | null>(null);
   const extListBuffer = useRef<string[]>([]);
-  const capabilityBuffer = useRef<{ supported: string[]; missing: string[] }>({ supported: [], missing: [] });
+  const extSyncPending = useRef(false);
 
   const [firmware, setFirmware] = useState<FirmwareState>({ phase: "idle", message: "", progress: 0, latest: null });
   const otaWaiter = useRef<((msg: OtaMessage) => void) | null>(null);
 
   const [busScanResults, setBusScanResults] = useState<BusScanResultMessage[]>([]);
   const [busScanRunning, setBusScanRunning] = useState(false);
+  const [busDiag, setBusDiag] = useState<string | null>(null);
 
   const [consoleLines, setConsoleLines] = useState<string[]>([]);
   const consoleBufferRef = useRef<string[]>([]);
+  const inboundSeen = useRef(false);
+
+  // Latest options for callbacks that run from BLE events.
+  const vehicleRef = useRef(vehicle);
+  const valuesRef = useRef(values);
+  vehicleRef.current = vehicle;
+  valuesRef.current = values;
+
+  const showToast = useCallback((text: string) => setToast(text), []);
+  useEffect(() => {
+    if (!toast) return;
+    const id = setTimeout(() => setToast(null), TOAST_MS);
+    return () => clearTimeout(id);
+  }, [toast]);
 
   const pushConsoleLine = useCallback((line: string) => {
     consoleBufferRef.current.push(`${timestampPrefix()}  ${line}`);
@@ -115,7 +137,8 @@ export function useObdMonitor() {
 
   const sendCommand = useCallback(
     async (command: ObdCommand, fields?: Record<string, unknown>): Promise<boolean> => {
-      pushConsoleLine(`APP -> ESP ${JSON.stringify({ command, ...(fields ?? {}) })}`);
+      const shown = command === "set_pin" ? { ...fields, pin: "******" } : fields;
+      pushConsoleLine(`APP -> ESP ${JSON.stringify({ command, ...(shown ?? {}) })}`);
       try {
         await bleObdClient.sendCommand(command, fields);
         return true;
@@ -127,31 +150,61 @@ export function useObdMonitor() {
     [pushConsoleLine]
   );
 
-  const confirmClearDtc = useCallback(
-    (token: string, expires: number) => {
-      Alert.alert(
-        "Clear trouble codes?",
-        "This erases stored, pending and freeze-frame data and resets the readiness monitors " +
-          `(the car will need a full drive cycle before an inspection). Confirm within ${expires} s.`,
-        [
-          { text: "Cancel", style: "cancel" },
-          { text: "Clear codes", style: "destructive", onPress: () => void sendCommand("clear_dtc", { confirm: token }) },
-        ]
-      );
+  const waitForExtAdd = () =>
+    new Promise<ExtAddMessage | null>((resolve) => {
+      const timer = setTimeout(() => {
+        extWaiter.current = null;
+        resolve(null);
+      }, EXT_ADD_TIMEOUT_MS);
+      extWaiter.current = (msg) => {
+        clearTimeout(timer);
+        extWaiter.current = null;
+        resolve(msg);
+      };
+    });
+
+  /** Replaces the manufacturer signals on the ESP with `list`. */
+  const loadExtSignals = useCallback(
+    async (list: StoredExtSignal[]) => {
+      const signals = list.slice(0, APP_CONFIG.maxExtSignals);
+      setExtLoad({ running: true, sent: 0, total: signals.length, failed: [] });
+      const failed: string[] = [];
+      await sendCommand("stop_stream");
+      await sendCommand("ext_clear");
+      for (let i = 0; i < signals.length; i++) {
+        const reply = waitForExtAdd();
+        const sent = await sendCommand("ext_add", extAddBody(signals[i]));
+        const result = sent ? await reply : null;
+        if (!result || !result.ok) failed.push(signals[i].key);
+        setExtLoad({ running: true, sent: i + 1, total: signals.length, failed: [...failed] });
+      }
+      setExtLoad({ running: false, sent: signals.length, total: signals.length, failed });
+      if (failed.length > 0) showToast(`${failed.length} manufacturer value(s) were rejected by the adapter`);
+      await sendCommand("ext_list");
     },
-    [sendCommand]
+    [sendCommand, showToast]
   );
+
+  /** Manufacturer signals the ESP should hold for the current vehicle. */
+  const desiredExt = () => (vehicleRef.current.kind === "profile" ? valuesRef.current.ext : []);
 
   const routeMessage = useCallback(
     (msg: ObdInboundMessage) => {
+      inboundSeen.current = true;
       switch (msg.type) {
         case "telemetry": {
           setTelemetryStatus(msg.status);
-          const values: TelemetryValues = {};
+          const fresh: TelemetryValues = {};
+          const now = Date.now();
           for (const [key, value] of Object.entries(msg)) {
-            if (typeof value === "number" && Number.isFinite(value) && key !== "ts") values[key] = value;
+            if (typeof value !== "number" || !Number.isFinite(value) || key === "ts") continue;
+            fresh[key] = value;
+            const series = history.current.get(key) ?? [];
+            series.push({ t: now, v: value });
+            while (series.length > 0 && now - series[0].t > HISTORY_WINDOW_MS) series.shift();
+            history.current.set(key, series);
           }
-          if (Object.keys(values).length > 0) setTelemetry((prev) => ({ ...prev, ...values }));
+          if (Object.keys(fresh).length > 0) setTelemetry((prev) => ({ ...prev, ...fresh }));
           return;
         }
         case "status":
@@ -171,33 +224,39 @@ export function useObdMonitor() {
         case "device":
           setDevice(msg);
           return;
+        case "security":
+          if (msg.event === "set_pin") {
+            showToast(msg.ok ? "PIN changed. New phones pair with the new PIN." : `PIN not changed (${msg.reason ?? "error"})`);
+          } else {
+            showToast("Paired phones forgotten. Remove OBD-ESP32 in Android Bluetooth settings, then pair again.");
+          }
+          return;
         case "capability": {
           const part = msg.part ?? 1;
           const parts = msg.parts ?? 1;
-          if (part === 1) capabilityBuffer.current = { supported: [], missing: [] };
-          capabilityBuffer.current.supported.push(...msg.supported_metrics);
-          capabilityBuffer.current.missing.push(...msg.missing_metrics);
+          if (part === 1) capabilityBuffer.current = [];
+          capabilityBuffer.current.push(...msg.supported_metrics);
           if (part === parts) {
-            setSupportedMetrics(capabilityBuffer.current.supported);
-            setMissingMetrics(capabilityBuffer.current.missing);
+            setSupportedMetrics(capabilityBuffer.current);
             setCapabilitiesConfirmed(msg.confirmed_from_vehicle);
           }
           return;
         }
         case "dtc":
           setDtc(msg);
+          setDtcReading(false);
           return;
         case "clear_dtc":
           if (msg.status === "confirm_required" && msg.token) {
-            confirmClearDtc(msg.token, msg.expires_s ?? 30);
+            setClearConfirm({ token: msg.token, expires: msg.expires_s ?? 30 });
           } else if (msg.status === "cleared") {
-            setDtc(null);
+            setDtc({ type: "dtc", status: "ok", codes: [], pending: [], permanent: [], ts: msg.ts });
             setFreezeFrame(null);
-            Alert.alert("Codes cleared", `${msg.ecus ?? 1} control unit(s) confirmed.`);
+            showToast(`Codes cleared (${msg.ecus ?? 1} control unit${(msg.ecus ?? 1) === 1 ? "" : "s"})`);
+          } else if (msg.reason === "vehicle_must_be_stopped_engine_off") {
+            showToast("Not cleared: stop the car, engine off, ignition on.");
           } else {
-            Alert.alert("Codes not cleared", msg.reason === "vehicle_must_be_stopped_engine_off"
-              ? "Stop the vehicle and turn the engine off (ignition on), then try again."
-              : `Status: ${msg.status}${msg.nrc ? ` (NRC 0x${msg.nrc.toString(16)})` : ""}`);
+            showToast(`Codes not cleared (${msg.status}${msg.nrc ? `, NRC 0x${msg.nrc.toString(16)}` : ""})`);
           }
           return;
         case "freeze_frame": {
@@ -213,7 +272,6 @@ export function useObdMonitor() {
           return;
         case "monitor_tests_done":
           setMonitorRunning(false);
-          setLastAck(`monitor tests: ${msg.count}`);
           return;
         case "vehicle_info":
           setVehicleInfo(msg);
@@ -227,7 +285,18 @@ export function useObdMonitor() {
         case "ext_list":
           if (msg.part === 1) extListBuffer.current = [];
           extListBuffer.current.push(...msg.keys);
-          if (msg.last) setExtOnDevice(extListBuffer.current);
+          if (msg.last) {
+            const onDevice = extListBuffer.current;
+            setExtOnDevice(onDevice);
+            if (extSyncPending.current) {
+              // Bring the ESP in line with the values chosen for this vehicle.
+              extSyncPending.current = false;
+              const wanted = desiredExt();
+              const want = new Set(wanted.map((s) => firmwareKey(s.key)));
+              const same = want.size === onDevice.length && onDevice.every((k) => want.has(k));
+              if (!same) void loadExtSignals(wanted);
+            }
+          }
           return;
         case "ack": {
           const reason = msg.reason ? ` (${msg.reason})` : "";
@@ -236,6 +305,9 @@ export function useObdMonitor() {
         }
         case "log":
           if (msg.level !== "info") setLastAck(`${msg.event}${msg.reason ? ` (${msg.reason})` : ""}`);
+          return;
+        case "bus_diag":
+          setBusDiag(JSON.stringify(msg.twai));
           return;
         case "bus_scan_start":
           setBusScanResults([]);
@@ -255,7 +327,8 @@ export function useObdMonitor() {
           return;
       }
     },
-    [confirmClearDtc]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [loadExtSignals, showToast]
   );
 
   const connect = useCallback(async () => {
@@ -269,7 +342,7 @@ export function useObdMonitor() {
           if (msg) routeMessage(msg);
           else pushConsoleLine("APP parse warning: malformed JSON payload");
         },
-        setConnected
+        setBleConnected
       );
     } catch {
       setLastAck("connection: error (ble_connect_failed)");
@@ -277,6 +350,11 @@ export function useObdMonitor() {
       setConnecting(false);
     }
   }, [connecting, pushConsoleLine, routeMessage]);
+
+  const disconnect = useCallback(() => {
+    bleObdClient.disconnect();
+    setBleConnected(false);
+  }, []);
 
   useEffect(() => {
     void connect();
@@ -286,17 +364,69 @@ export function useObdMonitor() {
 
   // Reconnect automatically after the link drops (out of range, ESP restart after an update).
   useEffect(() => {
-    if (connected || connecting) return;
+    if (bleConnected || connecting) return;
     const id = setTimeout(() => void connect(), RECONNECT_DELAY_MS);
     return () => clearTimeout(id);
-  }, [connected, connecting, connect]);
+  }, [bleConnected, connecting, connect]);
 
-  // Push the link configuration whenever the connection or the vehicle mode changes.
+  // After connecting, wait until the ESP answers. With firmware 2.1+ nothing
+  // comes back before the phone is paired, so keep asking (and re-subscribe)
+  // while the user enters the PIN.
   useEffect(() => {
-    if (!connected) return;
-    const cfg = mode.link;
+    if (!bleConnected) {
+      setLink(connecting ? "connecting" : "disconnected");
+      setRssi(null);
+      return;
+    }
+    let cancelled = false;
+    setLink("pairing");
+    inboundSeen.current = false;
+    void (async () => {
+      for (let attempt = 0; attempt < HANDSHAKE_ATTEMPTS && !cancelled; attempt++) {
+        if (attempt > 0) bleObdClient.resubscribe();
+        await sendCommand("device_info");
+        const deadline = Date.now() + HANDSHAKE_WAIT_MS;
+        while (!cancelled && !inboundSeen.current && Date.now() < deadline) {
+          await new Promise((r) => setTimeout(r, 150));
+        }
+        if (inboundSeen.current) {
+          if (!cancelled) setLink("ready");
+          return;
+        }
+      }
+      if (!cancelled) {
+        showToast("The adapter does not answer. Check the PIN and try again.");
+        disconnect();
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [bleConnected, connecting, disconnect, sendCommand, showToast]);
+
+  const ready = link === "ready";
+
+  // Signal strength for the link card.
+  useEffect(() => {
+    if (!ready) return;
+    const poll = () => void bleObdClient.readRssi().then(setRssi);
+    poll();
+    const id = setInterval(poll, RSSI_INTERVAL_MS);
+    return () => clearInterval(id);
+  }, [ready]);
+
+  // Push the link configuration whenever the connection or the vehicle changes.
+  const linkKey = vehicle.kind === "profile" ? `profile:${vehicle.file}` : vehicle.kind;
+  useEffect(() => {
+    if (!ready) return;
+    const cfg = linkConfig(vehicleRef.current);
     setTelemetry({});
+    history.current.clear();
     setProtocolInfo(null);
+    setSupportedMetrics([]);
+    setCapabilitiesConfirmed(false);
+    setDtc(null);
+    extSyncPending.current = true;
     void (async () => {
       await sendCommand("stop_stream");
       const fields: Record<string, unknown> = {
@@ -309,26 +439,50 @@ export function useObdMonitor() {
       await sendCommand("set_link", fields);
       await sendCommand("ext_list");
     })();
-  }, [connected, mode, sendCommand]);
+  }, [ready, linkKey, sendCommand]);
 
-  const selectMode = useCallback((id: VehicleKind) => {
-    setModeId(id);
-    const next = VEHICLE_MODES.find((m) => m.id === id);
-    if (next) setSelectedMetrics([...next.defaultMetrics]);
-  }, []);
+  const streaming = ready && (status?.stream_active ?? false);
 
-  const toggleMetric = useCallback((id: string) => {
-    setSelectedMetrics((prev) => (prev.includes(id) ? prev.filter((m) => m !== id) : [...prev, id]));
-  }, []);
-
-  const startStream = useCallback(() => {
-    setTelemetry({});
-    // Smart ED streams everything; the selection only filters what is shown.
-    const fields = mode.id === "smart_ed3" || selectedMetrics.length === 0 ? undefined : { metrics: selectedMetrics };
-    void sendCommand("start_stream", fields);
-  }, [mode.id, selectedMetrics, sendCommand]);
+  const startStream = useCallback(
+    (override?: VehicleValues) => {
+      const v = override ?? valuesRef.current;
+      setTelemetry({});
+      history.current.clear();
+      // Smart ED streams everything; the selection only filters what is shown.
+      const fields = vehicleRef.current.kind === "smart_ed3" || v.metrics.length === 0 ? undefined : { metrics: v.metrics };
+      void sendCommand("start_stream", fields);
+    },
+    [sendCommand]
+  );
 
   const stopStream = useCallback(() => void sendCommand("stop_stream"), [sendCommand]);
+
+  /** Applies a new value selection: loads manufacturer signals if needed and restarts the stream. */
+  const applyValues = useCallback(
+    async (next: VehicleValues) => {
+      if (!ready) return;
+      const wasStreaming = status?.stream_active ?? false;
+      if (vehicleRef.current.kind === "profile") {
+        const want = next.ext.map((s) => firmwareKey(s.key));
+        const same = want.length === extOnDevice.length && want.every((k) => extOnDevice.includes(k));
+        if (!same) await loadExtSignals(next.ext);
+      }
+      if (wasStreaming) startStream(next);
+    },
+    [extOnDevice, loadExtSignals, ready, startStream, status]
+  );
+
+  const readDtc = useCallback(() => {
+    setDtcReading(true);
+    void sendCommand("read_dtc");
+  }, [sendCommand]);
+
+  const requestClearDtc = useCallback(() => void sendCommand("clear_dtc"), [sendCommand]);
+  const confirmClearDtc = useCallback(() => {
+    if (clearConfirm) void sendCommand("clear_dtc", { confirm: clearConfirm.token });
+    setClearConfirm(null);
+  }, [clearConfirm, sendCommand]);
+  const cancelClearDtc = useCallback(() => setClearConfirm(null), []);
 
   const readMonitorTests = useCallback(() => {
     setMonitorTests([]);
@@ -339,46 +493,6 @@ export function useObdMonitor() {
   const readFreezeFrame = useCallback(() => {
     setFreezeFrame(null);
     void sendCommand("read_freeze_frame");
-  }, [sendCommand]);
-
-  const waitForExtAdd = () =>
-    new Promise<ExtAddMessage | null>((resolve) => {
-      const timer = setTimeout(() => {
-        extWaiter.current = null;
-        resolve(null);
-      }, EXT_ADD_TIMEOUT_MS);
-      extWaiter.current = (msg) => {
-        clearTimeout(timer);
-        extWaiter.current = null;
-        resolve(msg);
-      };
-    });
-
-  /** Replaces the manufacturer signals on the ESP with `selections`. */
-  const loadExtSignals = useCallback(
-    async (selections: ExtSignalSelection[]) => {
-      const list = selections.slice(0, APP_CONFIG.maxExtSignals);
-      setExtLoad({ running: true, sent: 0, total: list.length, failed: [] });
-      const failed: string[] = [];
-      await sendCommand("stop_stream");
-      await sendCommand("ext_clear");
-      for (let i = 0; i < list.length; i++) {
-        const reply = waitForExtAdd();
-        const sent = await sendCommand("ext_add", extAddBody(list[i]));
-        const result = sent ? await reply : null;
-        if (!result || !result.ok) failed.push(list[i].key);
-        setExtLoad({ running: true, sent: i + 1, total: list.length, failed: [...failed] });
-      }
-      setExtSignals(list.filter((s) => !failed.includes(s.key)));
-      setExtLoad({ running: false, sent: list.length, total: list.length, failed });
-      await sendCommand("ext_list");
-    },
-    [sendCommand]
-  );
-
-  const clearExtSignals = useCallback(async () => {
-    setExtSignals([]);
-    await sendCommand("ext_clear");
   }, [sendCommand]);
 
   const waitForOta = (accept: OtaMessage["status"][], timeoutMs: number) =>
@@ -414,24 +528,30 @@ export function useObdMonitor() {
     }
   }, [device]);
 
-  /** Downloads the firmware and writes it to the ESP over BLE; the ESP verifies the MD5 and restarts. */
+  /** Downloads the firmware and writes it to the ESP over BLE; the ESP checks signature and MD5, then restarts. */
   const installFirmware = useCallback(async () => {
     const info = firmware.latest;
-    if (!info || !connected) return;
+    if (!info || !ready) return;
     const fail = async (message: string, abort: boolean) => {
       if (abort) await sendCommand("ota_abort");
       setFirmware({ phase: "error", message, progress: 0, latest: info });
     };
+    if (device?.ota_signed && !info.sig) {
+      await fail("This image is not signed; the adapter only accepts signed firmware.", false);
+      return;
+    }
     try {
       setFirmware({ phase: "downloading", message: "Downloading firmware…", progress: 0, latest: info });
       const image = await downloadFirmware(info);
 
       await sendCommand("stop_stream");
-      const ready = waitForOta(["ready"], OTA_READY_TIMEOUT_MS);
-      await sendCommand("ota_begin", { size: image.length, md5: info.md5 });
-      const begin = await ready;
-      if (!begin || begin.status !== "ready") {
-        await fail(`ESP refused the update (${begin?.reason ?? "no answer"})`, false);
+      const readyMsg = waitForOta(["ready"], OTA_READY_TIMEOUT_MS);
+      const begin: Record<string, unknown> = { size: image.length, md5: info.md5 };
+      if (info.sig) begin.sig = info.sig;
+      await sendCommand("ota_begin", begin);
+      const started = await readyMsg;
+      if (!started || started.status !== "ready") {
+        await fail(`The adapter refused the update (${started?.reason ?? "no answer"})`, false);
         return;
       }
 
@@ -440,43 +560,43 @@ export function useObdMonitor() {
         await bleObdClient.writeOtaChunk(image.subarray(offset, Math.min(offset + chunk, image.length)));
         if (n % 8 === 7) await new Promise((r) => setTimeout(r, 15)); // let the ESP drain its BLE queue
         if (n % 20 === 0) {
-          setFirmware({ phase: "uploading", message: "Uploading to ESP…", progress: offset / image.length, latest: info });
+          setFirmware({ phase: "uploading", message: "Sending to the adapter…", progress: offset / image.length, latest: info });
         }
       }
 
-      setFirmware({ phase: "installing", message: "Verifying and installing…", progress: 1, latest: info });
+      setFirmware({ phase: "installing", message: "Checking signature and installing…", progress: 1, latest: info });
       const done = waitForOta(["done"], OTA_DONE_TIMEOUT_MS);
       await sendCommand("ota_end");
       const result = await done;
       if (result?.status === "done") {
         setFirmware({
           phase: "done",
-          message: `Version ${info.version} installed. The ESP is restarting; the app reconnects by itself.`,
+          message: `Version ${info.version} installed. The adapter restarts and the app reconnects by itself.`,
           progress: 1,
           latest: info,
         });
       } else {
-        await fail(`Update failed (${result?.reason ?? "no answer"}). The old firmware stays active.`, true);
+        const why = result?.reason === "bad_signature" ? "signature does not match" : result?.reason ?? "no answer";
+        await fail(`Update failed (${why}). The old firmware stays active.`, true);
       }
     } catch (e) {
       await fail((e as Error).message, true);
     }
-  }, [connected, firmware.latest, sendCommand]);
+  }, [device, firmware.latest, ready, sendCommand]);
 
-  const setSleepAfter = useCallback(
-    (seconds: number) => void sendCommand("set_power", { sleep_after_s: seconds }),
-    [sendCommand]
-  );
+  const setSleepAfter = useCallback((seconds: number) => void sendCommand("set_power", { sleep_after_s: seconds }), [sendCommand]);
+  const setPin = useCallback((pin: string) => void sendCommand("set_pin", { pin }), [sendCommand]);
+  const forgetBonds = useCallback(() => void sendCommand("forget_bonds"), [sendCommand]);
 
   const exportConsoleLog = useCallback(async () => {
     const header = [
       "OBD BLE Monitor log",
       `exported_at: ${new Date().toISOString()}`,
-      `vehicle_mode: ${mode.label}`,
+      `vehicle: ${vehicleName(vehicle)}`,
       `protocol: ${protocolInfo?.protocol ?? status?.protocol ?? "unknown"}`,
       `firmware: ${device?.fw ?? "unknown"}`,
-      `selected_metrics: ${selectedMetrics.join(",") || "(none)"}`,
-      `ext_signals: ${extSignals.map((s) => s.key).join(",") || "(none)"}`,
+      `metrics: ${values.metrics.join(",") || "(none)"}`,
+      `ext_signals: ${values.ext.map((s) => s.key).join(",") || "(none)"}`,
       `last_ack: ${lastAck}`,
       "----- BEGIN CONSOLE -----",
     ].join("\n");
@@ -485,58 +605,50 @@ export function useObdMonitor() {
     } catch {
       // user dismissed the share sheet
     }
-  }, [consoleLines, device, extSignals, lastAck, mode.label, protocolInfo, selectedMetrics, status]);
-
-  /** Telemetry keys of the loaded manufacturer signals, as the firmware sends them. */
-  const extValues = useMemo(
-    () =>
-      extSignals.map((s) => ({
-        key: s.key,
-        name: s.name,
-        unit: s.unit,
-        map: s.signal.map,
-        value: telemetry[firmwareKey(s.key)],
-      })),
-    [extSignals, telemetry]
-  );
+  }, [consoleLines, device, lastAck, protocolInfo, status, values, vehicle]);
 
   return {
-    connected,
-    connecting,
+    link,
+    ready,
     connect,
+    disconnect,
+    rssi,
     lastAck,
-    modes: VEHICLE_MODES,
-    mode,
-    selectMode,
-    selectedMetrics,
-    setSelectedMetrics,
-    toggleMetric,
+    toast,
+    showToast,
     telemetry,
     telemetryStatus,
+    history: history.current,
     status,
+    streaming,
     protocolInfo,
     probeStage,
     device,
     supportedMetrics,
-    missingMetrics,
     capabilitiesConfirmed,
     dtc,
+    dtcReading,
+    readDtc,
+    clearConfirm,
+    requestClearDtc,
+    confirmClearDtc,
+    cancelClearDtc,
     freezeFrame,
+    readFreezeFrame,
     readiness,
     monitorTests,
     monitorRunning,
+    readMonitorTests,
     vehicleInfo,
-    extSignals,
-    extValues,
     extLoad,
     extOnDevice,
+    applyValues,
     firmware,
     checkFirmware,
     installFirmware,
-    loadExtSignals,
-    clearExtSignals,
     busScanResults,
     busScanRunning,
+    busDiag,
     consoleLines,
     clearConsole: () => {
       consoleBufferRef.current = [];
@@ -546,9 +658,9 @@ export function useObdMonitor() {
     sendCommand,
     startStream,
     stopStream,
-    readMonitorTests,
-    readFreezeFrame,
     setSleepAfter,
+    setPin,
+    forgetBonds,
   };
 }
 

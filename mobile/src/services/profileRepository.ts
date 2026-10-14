@@ -1,5 +1,6 @@
 import { APP_CONFIG } from "../config";
 import profileIndex from "../data/profile-index.json";
+import type { StoredExtSignal } from "../types/vehicles";
 import { gunzip, utf8Decode } from "../utils/gunzip";
 
 /** One entry of profiles/index.json. */
@@ -88,17 +89,49 @@ export async function loadProfile(entry: ProfileIndexEntry): Promise<VehicleProf
   return profile;
 }
 
+// OBDb unit names -> what the app shows.
+const UNITS: Record<string, string> = {
+  scalar: "", unknown: "", hex: "", volts: "V", millivolts: "mV", celsius: "°C", fahrenheit: "°F", percent: "%",
+  degrees: "°", rpm: "rpm", kilometers: "km", miles: "mi", kilometersPerHour: "km/h", milesPerHour: "mph",
+  newtonMeters: "Nm", milliseconds: "ms", seconds: "s", minutes: "min", hours: "h", bars: "bar", kilopascal: "kPa",
+  psi: "psi", amps: "A", milliamps: "mA", millimeters: "mm", centimeters: "cm", meters: "m", liters: "L",
+  gallons: "gal", ampereHours: "Ah", metersPerSecondSquared: "m/s²", metersPerSecond: "m/s", kilowattHours: "kWh",
+  kilowatts: "kW", watts: "W", gramsPerSecond: "g/s", gravity: "g", ohms: "Ω", milliohms: "mΩ", kiloohms: "kΩ",
+  megaohms: "MΩ", hertz: "Hz", milligramsPerStroke: "mg/stroke", gramsPerLiter: "g/L", kilogramsPerHour: "kg/h",
+  kilowattHoursPer100Kilometers: "kWh/100km", kilowattHoursPer100Miles: "kWh/100mi", radians: "rad",
+  litersPerHour: "L/h",
+};
+
+// Two-state units get readable values when the profile has no map of its own.
+const BOOLEAN_MAPS: Record<string, Record<string, string>> = {
+  offon: { "0": "Off", "1": "On" },
+  onoff: { "0": "On", "1": "Off" },
+  noyes: { "0": "No", "1": "Yes" },
+  yesno: { "0": "Yes", "1": "No" },
+};
+
+export function booleanMap(unit: string | undefined): Record<string, string> | undefined {
+  return unit ? BOOLEAN_MAPS[unit] : undefined;
+}
+
+export function displayUnit(unit: string | undefined): string {
+  if (!unit) return "";
+  if (unit in BOOLEAN_MAPS) return "";
+  return UNITS[unit] ?? unit;
+}
+
 export function flattenSignals(profile: VehicleProfileData): ExtSignalSelection[] {
   const out: ExtSignalSelection[] = [];
   for (const command of profile.commands) {
     for (const signal of command.signals) {
+      const map = signal.map ?? BOOLEAN_MAPS[signal.u];
       out.push({
         key: signal.k,
         name: signal.n || signal.k,
-        unit: signal.u ?? "",
+        unit: displayUnit(signal.u),
         path: signal.path ?? "",
         command,
-        signal,
+        signal: map && !signal.map ? { ...signal, map } : signal,
       });
     }
   }
@@ -116,8 +149,14 @@ export function firmwareKey(key: string): string {
   return `${lower.slice(0, 30)}_${hash.toString(16).padStart(8, "0")}`;
 }
 
+/** A selection without the command's other signals, small enough to keep in storage. */
+export function toStoredSignal(selection: ExtSignalSelection): StoredExtSignal {
+  const { signals: _signals, ...command } = selection.command;
+  return { key: selection.key, name: selection.name, unit: selection.unit, path: selection.path, command, signal: selection.signal };
+}
+
 /** Builds the ext_add command body for one signal. */
-export function extAddBody(selection: ExtSignalSelection): Record<string, unknown> {
+export function extAddBody(selection: { command: Omit<ProfileCommand, "signals">; signal: ProfileSignal }): Record<string, unknown> {
   const { command, signal } = selection;
   const body: Record<string, unknown> = {
     k: signal.k,
@@ -138,7 +177,7 @@ export function extAddBody(selection: ExtSignalSelection): Record<string, unknow
 }
 
 /** Human readable model-year filter, e.g. "2019–2022". */
-export function yearsLabel(command: ProfileCommand): string {
+export function yearsLabel(command: Pick<ProfileCommand, "years">): string {
   const y = command.years;
   if (!y) return "";
   if (y.years && y.years.length) return y.years.join(", ");
